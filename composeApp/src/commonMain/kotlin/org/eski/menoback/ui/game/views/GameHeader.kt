@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.game.data.GameSettings
+import org.eski.menoback.ui.utils.grid3
+import org.eski.menoback.ui.utils.gridHalf
 
 @Composable
 fun GameHeader(
@@ -95,7 +97,9 @@ fun GameHeader(
           ) {
             IconButton(
               onClick = { gameSettings.decreaseGameDuration() },
-              modifier = Modifier.size(24.dp)
+              modifier = Modifier.size(grid3)
+                .align(alignment = Alignment.CenterVertically)
+                .padding(top = 4.dp)
             ) {
               Icon(
                 imageVector = Icons.Default.Remove,
@@ -104,17 +108,19 @@ fun GameHeader(
                 modifier = Modifier.size(16.dp)
               )
             }
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(gridHalf))
             Text(
               text = gameSettings.formatDuration(if (gameState == GameState.NotStarted) gameDuration else timeLeft),
               fontSize = 16.sp,
               fontWeight = FontWeight.Bold,
               color = timerColor,
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(gridHalf))
             IconButton(
               onClick = { gameSettings.increaseGameDuration() },
-              modifier = Modifier.size(24.dp)
+              modifier = Modifier.size(grid3)
+                .align(alignment = Alignment.CenterVertically)
+                .padding(top = 4.dp)
             ) {
               Icon(
                 imageVector = Icons.Default.Add,
