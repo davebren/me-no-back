@@ -82,51 +82,47 @@ fun GameHeader(
 
       // Timer with +/- buttons, only visible when game is not started
       if (gameState == GameState.NotStarted) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          IconButton(
-            onClick = { gameSettings.decreaseGameDuration() },
-            modifier = Modifier.size(24.dp)
+          Text(
+            text = "Time",
+            fontSize = 12.sp,
+            color = Color.Gray
+          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            Icon(
-              imageVector = Icons.Default.Remove,
-              contentDescription = "Decrease Game Duration",
-              tint = Color.LightGray,
-              modifier = Modifier.size(16.dp)
-            )
-          }
-
-          Spacer(modifier = Modifier.width(4.dp))
-
-          Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-          ) {
-            Text(
-              text = "Time",
-              fontSize = 12.sp,
-              color = Color.Gray
-            )
+            IconButton(
+              onClick = { gameSettings.decreaseGameDuration() },
+              modifier = Modifier.size(24.dp)
+            ) {
+              Icon(
+                imageVector = Icons.Default.Remove,
+                contentDescription = "Decrease Game Duration",
+                tint = Color.LightGray,
+                modifier = Modifier.size(16.dp)
+              )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
               text = gameSettings.formatDuration(if (gameState == GameState.NotStarted) gameDuration else timeLeft),
               fontSize = 16.sp,
               fontWeight = FontWeight.Bold,
               color = timerColor,
             )
-          }
-
-          Spacer(modifier = Modifier.width(4.dp))
-
-          IconButton(
-            onClick = { gameSettings.increaseGameDuration() },
-            modifier = Modifier.size(24.dp)
-          ) {
-            Icon(
-              imageVector = Icons.Default.Add,
-              contentDescription = "Increase Game Duration",
-              tint = Color.LightGray,
-              modifier = Modifier.size(16.dp)
-            )
+            Spacer(modifier = Modifier.width(4.dp))
+            IconButton(
+              onClick = { gameSettings.increaseGameDuration() },
+              modifier = Modifier.size(24.dp)
+            ) {
+              Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Increase Game Duration",
+                tint = Color.LightGray,
+                modifier = Modifier.size(16.dp)
+              )
+            }
           }
         }
       } else {

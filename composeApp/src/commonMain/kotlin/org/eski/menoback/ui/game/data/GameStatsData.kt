@@ -54,7 +54,7 @@ class GameStatsData(val settings: Settings) {
         val nBackLevel = nbackLevels[duration]?.value ?: 1
         
         return if (highScore > 0) {
-            "Best: $highScore (${nBackLevel}-back)"
+            "High score: $highScore (${nBackLevel}-back)"
         } else {
             "No high score yet"
         }
