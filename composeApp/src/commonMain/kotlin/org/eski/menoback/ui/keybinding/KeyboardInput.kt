@@ -91,6 +91,7 @@ fun KeyboardInput(
           }
 
           dropPiece -> vm.dropPiece()
+          nbackMatch -> vm.nbackMatchChoice()
         }
       }
 
@@ -99,7 +100,6 @@ fun KeyboardInput(
           moveLeft -> leftPressed = false
           moveRight -> rightPressed = false
           moveDown -> downPressed = false
-          nbackMatch -> vm.nbackMatchChoice()
         }
       }
 

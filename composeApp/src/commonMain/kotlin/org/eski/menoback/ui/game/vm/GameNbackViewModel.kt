@@ -1,15 +1,19 @@
 package org.eski.menoback.ui.game.vm
 
+import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.eski.menoback.ui.game.model.Tetrimino
 
 class GameNbackViewModel(
-  scope: CoroutineScope,
+  val scope: CoroutineScope,
   val gameState: MutableStateFlow<GameState>,
   val currentTetrimino: MutableStateFlow<Tetrimino?>,
 ) {
@@ -17,6 +21,8 @@ class GameNbackViewModel(
 
   val level = MutableStateFlow(1)
   val streak = MutableStateFlow(0)
+
+  val feedback = MutableStateFlow<FeedbackState>(FeedbackState.none)
 
   val multiplier = combine(level, streak) { level, streak ->
     1.0f + (streak * (level * 2) * 0.1f)
@@ -51,6 +57,12 @@ class GameNbackViewModel(
     }
 
     streak.value = if (correct) { streak.value + 1 } else 0
+
+    feedback.value = if (correct) FeedbackState.correct else FeedbackState.incorrect
+    scope.launch {
+      delay(300)
+      feedback.value = FeedbackState.none
+    }
   }
 
   fun noMatchChoice(tetriminoHistory: List<Tetrimino>) {
@@ -63,7 +75,21 @@ class GameNbackViewModel(
     } else true
 
     streak.value = if (correct) { streak.value + 1 } else 0
+
+    if (!correct) {
+      feedback.value = FeedbackState.incorrect
+      scope.launch {
+        delay(300)
+        feedback.value = FeedbackState.none
+      }
+    }
   }
 
   fun clearMatchChoice() { matchChoiceMade = false }
+
+  enum class FeedbackState {
+    correct,
+    incorrect,
+    none,
+  }
 }

@@ -39,6 +39,7 @@ fun GameScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.DarkGray)
+            .feedback(vm)
     ) {
         Column(
             modifier = Modifier

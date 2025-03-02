@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import org.eski.menoback.ui.AppColors
 import org.eski.menoback.ui.game.model.Board
 import org.eski.menoback.ui.game.model.Tetrimino
 import org.eski.menoback.ui.game.model.boardHeight
@@ -36,6 +37,7 @@ class GameScreenViewModel(
   private val gameSettings: GameSettings,
   private val gameStatsData: GameStatsData = defaultGameStatsData
 ) : ViewModel() {
+  val appColors = MutableStateFlow(AppColors())
   val tetriminoColors = MutableStateFlow(TetriminoColors())
 
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
