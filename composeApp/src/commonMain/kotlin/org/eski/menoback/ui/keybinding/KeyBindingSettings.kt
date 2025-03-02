@@ -19,15 +19,14 @@ class KeyBindingSettings(val settings: Settings) {
     private const val nbackMatchKey = "$settingsKey.nbackMatch"
     private const val togglePlayPauseKey = "$settingsKey.togglePlayPause"
 
-    // Default keybindings
     private val defaultMoveLeft = Key.DirectionLeft.keyCode
     private val defaultMoveRight = Key.DirectionRight.keyCode
     private val defaultMoveDown = Key.DirectionDown.keyCode
-    private val defaultRotateClockwise = Key.V.keyCode
-    private val defaultRotateCounterClockwise = Key.Q.keyCode
+    private val defaultRotateClockwise = Key.X.keyCode
+    private val defaultRotateCounterClockwise = Key.Z.keyCode
     private val defaultRotate180 = Key.DirectionUp.keyCode
     private val defaultDropPiece = Key.Spacebar.keyCode
-    private val defaultNbackMatch = Key.Z.keyCode
+    private val defaultNbackMatch = Key.C.keyCode
     private val defaultTogglePlayPause = Key.Enter.keyCode
   }
 
