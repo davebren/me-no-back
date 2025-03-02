@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +31,7 @@ fun NBackLevelSelector(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Text(
-      text = "$nbackLevel-Back Level",
+      text = "n-Back Level",
       fontSize = 16.sp,
       fontWeight = FontWeight.Bold,
       color = Color.LightGray
@@ -45,8 +46,7 @@ fun NBackLevelSelector(
         onClick = { vm.nback.decreaseLevel() },
         modifier = Modifier.size(40.dp)
       ) {
-        Icon(Icons.Filled.Close, contentDescription = "Decrease N-Back Level")
-//        Icon(Icons.Default.Remove, contentDescription = "Decrease N-Back Level")
+        Icon(Icons.Default.Remove, contentDescription = "Decrease N-Back Level")
       }
 
       Spacer(modifier = Modifier.width(8.dp))

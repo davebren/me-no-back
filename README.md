@@ -16,3 +16,4 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 - Bag of seven spawn mechanic
 - Repeated match or no-match probability decay
 - Less streak heavy scoring (streak + n-back % based multiplier)
+- Configurable theming

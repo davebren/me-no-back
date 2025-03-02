@@ -13,6 +13,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
@@ -84,8 +85,7 @@ fun GameStatus(
           Button(
             onClick = onPauseClicked
           ) {
-            Icon(Icons.Filled.Close, contentDescription = "Pause")
-//                        Icon(Icons.Filled.Pause, contentDescription = "Pause")
+            Icon(Icons.Filled.Pause, contentDescription = "Pause")
             Spacer(modifier = Modifier.width(8.dp))
             Text("Pause")
           }

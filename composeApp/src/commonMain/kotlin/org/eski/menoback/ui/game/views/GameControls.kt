@@ -13,8 +13,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,7 +45,6 @@ fun GameControls(
       modifier = Modifier.fillMaxWidth()
     ) {
       Icon(Icons.Filled.Refresh, contentDescription = "Rotate")
-//            Icon(Icons.Filled.RotateRight, contentDescription = "Rotate")
       Spacer(modifier = Modifier.width(8.dp))
       Text("Rotate")
     }
@@ -82,8 +81,7 @@ fun GameControls(
       modifier = Modifier.fillMaxWidth(),
       colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
     ) {
-      Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Drop", tint = Color.White)
-//            Icon(Icons.Filled.ArrowDownward, contentDescription = "Drop")
+      Icon(Icons.Filled.ArrowDownward, contentDescription = "Drop", tint = Color.White)
       Spacer(modifier = Modifier.width(8.dp))
       Text("Drop", color = Color.White)
     }

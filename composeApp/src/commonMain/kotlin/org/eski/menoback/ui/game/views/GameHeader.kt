@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -89,7 +90,7 @@ fun GameHeader(
             modifier = Modifier.size(24.dp)
           ) {
             Icon(
-              imageVector = Icons.Default.Clear,
+              imageVector = Icons.Default.Remove,
               contentDescription = "Decrease Game Duration",
               tint = Color.LightGray,
               modifier = Modifier.size(16.dp)

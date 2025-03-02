@@ -20,33 +20,32 @@ const val feedbackDurationMillis = 300
 
 @Composable
 fun Modifier.feedback(vm: GameScreenViewModel): Modifier = composed {
-    val feedbackState by vm.nback.feedback.collectAsState()
-    if (feedbackState == FeedbackState.none) return@composed this@composed
+  val feedbackState by vm.nback.feedback.collectAsState()
+  if (feedbackState == FeedbackState.none) return@composed this@composed
 
-    var animationTriggered by remember { mutableStateOf(false) }
-    val animationAlpha by animateFloatAsState(
-        targetValue = if (animationTriggered) 0.3f else 0.1f,
-        animationSpec = tween(durationMillis = feedbackDurationMillis / 2),
-        label = "feedbackAlpha"
+  var animationTriggered by remember { mutableStateOf(false) }
+  val animationAlpha by animateFloatAsState(
+    targetValue = if (animationTriggered) 0.3f else 0.1f,
+    animationSpec = tween(durationMillis = feedbackDurationMillis / 2),
+    label = "feedbackAlpha"
+  )
+
+  val feedbackColor = when (feedbackState) {
+    FeedbackState.correct -> vm.appColors.value.feedbackCorrect
+    FeedbackState.incorrect -> vm.appColors.value.feedbackIncorrect
+    FeedbackState.none -> throw IllegalStateException()
+  }
+
+  LaunchedEffect(feedbackState) {
+    animationTriggered = true
+    delay((feedbackDurationMillis / 2).toLong())
+    animationTriggered = false
+  }
+
+  drawBehind {
+    drawRect(
+      color = feedbackColor.copy(alpha = animationAlpha),
+      size = size
     )
-    
-    val feedbackColor = when (feedbackState) {
-        FeedbackState.correct -> vm.appColors.value.feedbackCorrect
-        FeedbackState.incorrect -> vm.appColors.value.feedbackIncorrect
-        FeedbackState.none -> throw IllegalStateException()
-    }
-    
-    LaunchedEffect(feedbackState) {
-        animationTriggered = true
-        delay((feedbackDurationMillis / 2).toLong())
-        animationTriggered = false
-    }
-
-
-    drawBehind {
-        drawRect(
-            color = feedbackColor.copy(alpha = animationAlpha),
-            size = size
-        )
-    }
+  }
 }

@@ -79,6 +79,8 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
+
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.lifecycle.viewmodel.compose)
@@ -136,7 +138,6 @@ compose.desktop {
             licenseFile.set(file("${rootDir.absolutePath}/LICENSE"))
 
             macOS {
-//                iconFile.set(project.file("icon.icns"))
                 iconFile.set(file("${rootDir.absolutePath}/platform-assets/icon.icns"))
             }
             windows {
@@ -146,58 +147,5 @@ compose.desktop {
                 iconFile.set(project.file("icon.png"))
             }
         }
-    }
-}
-
-
-tasks.register("createMacosApp") {
-    dependsOn("linkReleaseExecutableMacosX64")
-
-    doLast {
-        // App name
-        val appName = "MeNoBack"
-        // Output directory for the app
-        val appDir = File("$buildDir/compose/binaries/main/app/$appName.app")
-        // Create the basic app structure
-        File("$appDir/Contents/MacOS").mkdirs()
-        File("$appDir/Contents/Resources").mkdirs()
-
-        // Copy the binary to the app bundle
-        copy {
-            from("$buildDir/bin/macosX64/releaseExecutable/MeNoBack.kexe")
-            into("$appDir/Contents/MacOS")
-            rename { "$appName" }
-        }
-
-        // Make the binary executable
-        File("$appDir/Contents/MacOS/$appName").setExecutable(true)
-
-        // Create Info.plist
-        File("$appDir/Contents/Info.plist").writeText("""
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-                <key>CFBundleExecutable</key>
-                <string>$appName</string>
-                <key>CFBundleIconFile</key>
-                <string>AppIcon</string>
-                <key>CFBundleIdentifier</key>
-                <string>org.eski.menoback</string>
-                <key>CFBundleInfoDictionaryVersion</key>
-                <string>6.0</string>
-                <key>CFBundleName</key>
-                <string>$appName</string>
-                <key>CFBundlePackageType</key>
-                <string>APPL</string>
-                <key>CFBundleShortVersionString</key>
-                <string>1.0</string>
-                <key>CFBundleVersion</key>
-                <string>1</string>
-                <key>NSHighResolutionCapable</key>
-                <true/>
-            </dict>
-            </plist>
-        """.trimIndent())
     }
 }
