@@ -1,6 +1,7 @@
 package org.eski.menoback.ui.game.vm
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
@@ -28,9 +29,14 @@ import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.data.gameStatsData as defaultGameStatsData
 import org.eski.util.deepCopy
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 import kotlin.random.Random
 
-const val nbackMatchChance = 0.2f
+const val nbackBaseMatchChance = 0.2f
+const val nbackMatchChanceGrowthFactor = 0.1f
+const val nbackMatchChanceDecayFactor = 0.05f
 const val initialGameTickRate = 1000L
 
 class GameScreenViewModel(
@@ -80,7 +86,6 @@ class GameScreenViewModel(
 
   private var timerJob: Job? = null
 
-  // Initialize the time remaining when game settings change
   init {
     viewModelScope.launch {
       gameSettings.gameDuration.collect { duration ->
@@ -165,7 +170,6 @@ class GameScreenViewModel(
   }
 
   private fun gameOver() {
-    // Update high score if needed
     val currentScore = score.value
     val nBackLevel = nback.level.value
     val gameDuration = gameSettings.gameDuration.value
@@ -173,7 +177,6 @@ class GameScreenViewModel(
     gameStatsData.updateHighScore(gameDuration, currentScore, nBackLevel)
     currentHighScoreText.value = gameStatsData.formatHighScoreText(gameDuration)
 
-    // Set game state to game over
     _gameState.value = GameState.GameOver
     gameJob?.cancel()
   }
@@ -325,7 +328,19 @@ class GameScreenViewModel(
     while (unpickedNextPieces.isNotEmpty()) {
       val nbackLevel = nback.level.value
 
-      val nextPiece = if (nbackLevel < nextPieces.size && Random.nextFloat() < nbackMatchChance) {
+      val lastMatchDistance = lastMatchDistance(nextPieces)
+      val matchChance = when (lastMatchDistance) {
+        null -> {
+          min(.95f, nbackBaseMatchChance + (sqrt((nextPieces.size + tetriminoHistory.size).toFloat()) * nbackMatchChanceGrowthFactor))
+        }
+        0 -> {
+          val streakLength = matchStreakLength(nextPieces)
+          max(0.05f, nbackBaseMatchChance - sqrt(streakLength.toFloat()) * nbackMatchChanceDecayFactor)
+        }
+        else -> min(.95f, nbackBaseMatchChance + (sqrt(lastMatchDistance.toFloat()) * nbackMatchChanceGrowthFactor))
+      }
+
+      val nextPiece = if (nbackLevel < nextPieces.size && Random.nextFloat() < matchChance) {
         nextPieces.getOrNull(nextPieces.size - nbackLevel) ?: throw IllegalStateException()
       } else unpickedNextPieces.random()
 
@@ -334,6 +349,26 @@ class GameScreenViewModel(
     }
     nextTetriminos.value = nextPieces
     if (morePiecesNeeded()) fillNextPieces()
+  }
+
+  private fun lastMatchDistance(nextPieces: List<Tetrimino>): Int? {
+    val reversed = nextPieces.reversed() + tetriminoHistory.reversed()
+
+    reversed.forEachIndexed { index, tetrimino ->
+      val matchPiece = reversed.getOrNull(index + nback.level.value) ?: return null
+      if (matchPiece.type == tetrimino.type) return index
+    }
+    return null
+  }
+  private fun matchStreakLength(nextPieces: List<Tetrimino>): Int {
+    val reversed = nextPieces.reversed() + tetriminoHistory.reversed()
+    var streak = 0
+    reversed.forEachIndexed { index, tetrimino ->
+      val matchPiece = reversed.getOrNull(index + nback.level.value) ?: return streak
+      if (matchPiece.type == tetrimino.type) streak++
+      else return streak
+    }
+    return streak
   }
 
   private fun morePiecesNeeded() = nextTetriminos.value.size < (14 + nback.level.value)

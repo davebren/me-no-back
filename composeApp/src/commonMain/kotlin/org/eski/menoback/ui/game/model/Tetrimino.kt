@@ -2,6 +2,10 @@ package org.eski.menoback.ui.game.model
 
 data class Tetrimino(val type: Int, val shape: Array<IntArray>) {
 
+  override fun toString(): String {
+    return type.toString()
+  }
+
   fun rotate(direction: Rotation): Tetrimino {
     val initialRowCount = shape.size
     val initialColumnCount = shape[0].size
