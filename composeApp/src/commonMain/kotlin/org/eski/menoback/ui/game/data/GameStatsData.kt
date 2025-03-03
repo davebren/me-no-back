@@ -15,7 +15,7 @@ class GameStatsData(val settings: Settings) {
     }
     
     // Map to store high scores for each game duration with default value 0
-    val highScores = GameSettings.AVAILABLE_DURATIONS.associateWith { duration ->
+    val highScores: Map<Int, MutableStateFlow<Int>> = GameSettings.AVAILABLE_DURATIONS.associateWith { duration ->
         MutableStateFlow(settings.getInt(highScoreKey(duration), 0))
     }.toMutableMap()
     

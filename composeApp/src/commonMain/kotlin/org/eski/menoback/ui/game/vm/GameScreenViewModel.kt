@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -68,9 +69,11 @@ class GameScreenViewModel(
     if (it < warningThreshold) Color.Red else Color.LightGray
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Color.LightGray)
 
-  // High score for current duration
-  val currentHighScore = gameStatsData.highScores[gameSettings.gameDuration.value]?.value ?: 0
+  val currentHighScore: StateFlow<StateFlow<Int>?> = gameSettings.gameDuration.map { duration ->
+    gameStatsData.highScores[duration]
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
   val currentHighScoreText = MutableStateFlow(gameStatsData.formatHighScoreText(gameSettings.gameDuration.value))
+
 
   private var timerJob: Job? = null
 

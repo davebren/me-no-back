@@ -41,8 +41,9 @@ fun GameOverOverlay(
 ) {
     val gameState by vm.gameState.collectAsState()
     val score by vm.score.collectAsState()
-    val currentHighScore = vm.currentHighScore
-    val isNewHighScore = score > currentHighScore && gameState == GameState.GameOver
+    val currentHighScoreFlow by vm.currentHighScore.collectAsState()
+    val currentHighScore = currentHighScoreFlow?.collectAsState()
+    val isNewHighScore = score >= (currentHighScore?.value ?: 0) && gameState == GameState.GameOver
     
     // Only display the overlay when the game is over
     AnimatedVisibility(
@@ -62,7 +63,7 @@ fun GameOverOverlay(
             if (isNewHighScore) {
                 NewHighScoreContent(score = score)
             } else {
-                GameOverContent(score = score, highScore = currentHighScore)
+                GameOverContent(score = score, highScore = currentHighScore?.value ?: 0)
             }
         }
     }
