@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +30,7 @@ import org.eski.menoback.data.gameStatsData as defaultGameStatsData
 import org.eski.util.deepCopy
 import kotlin.random.Random
 
-const val nbackMatchBias = 0.15f
+const val nbackMatchChance = 0.2f
 const val initialGameTickRate = 1000L
 
 class GameScreenViewModel(
@@ -46,7 +45,11 @@ class GameScreenViewModel(
 
   val currentTetrimino = MutableStateFlow<Tetrimino?>(null)
   val currentPiecePosition = MutableStateFlow<Tetrimino.Position?>(null)
-  val nextTetrimino = MutableStateFlow<Tetrimino?>(null)
+  val nextTetriminos = MutableStateFlow<List<Tetrimino>>(emptyList())
+  val nextTetrimino = nextTetriminos.map {
+    it.firstOrNull()
+  }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
   private val tetriminoHistory = mutableListOf<Tetrimino>()
 
   val board = MutableStateFlow(Board())
@@ -102,6 +105,7 @@ class GameScreenViewModel(
     if (_gameState.value != GameState.Running) {
       resetGame()
       _gameState.value = GameState.Running
+      fillNextPieces()
       spawnNewPiece()
       startGameLoop()
       startTimer()
@@ -129,7 +133,7 @@ class GameScreenViewModel(
     timerJob?.cancel()
     board.value = Board()
     currentTetrimino.value = null
-    nextTetrimino.value = null
+    nextTetriminos.value = emptyList()
     tetriminoHistory.clear()
     nback.streak.value = 0
     score.value = 0
@@ -153,8 +157,6 @@ class GameScreenViewModel(
 
     if (!moveTetriminoDown()) {
       lockTetrimino()
-      val completedLines = clearFilledRows()
-      addScore(completedLines)
 
       if (!spawnNewPiece()) {
         gameOver()
@@ -221,7 +223,8 @@ class GameScreenViewModel(
     if (_gameState.value != GameState.Running) return
 
     while (moveTetriminoDown());
-    tick()
+    lockTetrimino()
+    spawnNewPiece()
   }
 
   fun downClicked(): Boolean {
@@ -259,7 +262,10 @@ class GameScreenViewModel(
       }
     }
 
+    nback.clearMatchChoice()
     board.value = board.value.copy(boardUpdate)
+    val completedLines = clearFilledRows()
+    addScore(completedLines)
   }
 
   private fun clearFilledRows(): Int {
@@ -303,25 +309,34 @@ class GameScreenViewModel(
   }
 
   private fun spawnNewPiece(): Boolean {
-    val spawnedPiece = nextTetrimino.value ?: generateRandomPiece()
-    nextTetrimino.value = if (Random.nextFloat() < nbackMatchBias) {
-      if (nback.level.value == 1) {
-        spawnedPiece.copy()
-      } else {
-        tetriminoHistory.getOrNull((tetriminoHistory.size) - nback.level.value) ?: generateRandomPiece()
-      }
-    } else generateRandomPiece()
-
-    currentTetrimino.value = spawnedPiece
+    currentTetrimino.value = nextTetriminos.value.firstOrNull() ?: throw IllegalStateException()
+    nextTetriminos.value = nextTetriminos.value.subList(1, nextTetriminos.value.size)
+    if (morePiecesNeeded()) fillNextPieces()
+    currentTetrimino.value?.let { tetriminoHistory.add(it) }
     currentPiecePosition.value = newTetriminoStartPosition
-
-    tetriminoHistory.add(spawnedPiece)
-    nback.clearMatchChoice()
 
     return board.value.validPosition(currentTetrimino.value, newTetriminoStartPosition)
   }
 
-  private fun generateRandomPiece() = Tetrimino.types[Random.nextInt(Tetrimino.types.size)]
+  private fun fillNextPieces() {
+    val unpickedNextPieces = Tetrimino.types.toMutableList()
+    val nextPieces = nextTetriminos.value.toMutableList()
+
+    while (unpickedNextPieces.isNotEmpty()) {
+      val nbackLevel = nback.level.value
+
+      val nextPiece = if (nbackLevel < nextPieces.size && Random.nextFloat() < nbackMatchChance) {
+        nextPieces.getOrNull(nextPieces.size - nbackLevel) ?: throw IllegalStateException()
+      } else unpickedNextPieces.random()
+
+      unpickedNextPieces.remove(nextPiece)
+      nextPieces.add(nextPiece)
+    }
+    nextTetriminos.value = nextPieces
+    if (morePiecesNeeded()) fillNextPieces()
+  }
+
+  private fun morePiecesNeeded() = nextTetriminos.value.size < (14 + nback.level.value)
 
   private fun startTimer() {
     timerJob?.cancel()
