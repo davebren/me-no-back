@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+val version = "1.0.1"
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -105,7 +107,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = version
     }
     packaging {
         resources {
@@ -134,7 +136,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "MeNoBack"
-            packageVersion = "1.0.0"
+            packageVersion = version
             licenseFile.set(file("${rootDir.absolutePath}/LICENSE"))
 
             macOS {
