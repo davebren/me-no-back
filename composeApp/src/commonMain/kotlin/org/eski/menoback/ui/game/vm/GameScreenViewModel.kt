@@ -83,6 +83,7 @@ class GameScreenViewModel(
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
   val currentHighScoreText = MutableStateFlow(gameStatsData.formatHighScoreText(gameSettings.gameDuration.value))
 
+  val feedbackMode = gameSettings.feedbackMode
 
   private var timerJob: Job? = null
 

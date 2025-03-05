@@ -19,6 +19,7 @@ import org.eski.menoback.ui.keybinding.KeyBindingSettings
 import org.eski.menoback.ui.keybinding.KeyBindingSettingsDialog
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
+import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.keybinding.KeyboardInput
 import org.eski.menoback.ui.utils.grid2
 
@@ -32,14 +33,18 @@ fun GameScreen(
     }
 ) {
     val gameState by vm.gameState.collectAsState()
+    val feedbackMode by vm.feedbackMode.collectAsState()
     var showKeyBindingDialog by remember { mutableStateOf(false) }
 
     KeyboardInput(vm, keyBindings)
+
+    val backgroundModifier = Modifier
+    if (feedbackMode == FeedbackMode.flashBackground) backgroundModifier.feedback(vm)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.DarkGray)
-            .feedback(vm)
     ) {
         Column(
             modifier = Modifier
@@ -84,6 +89,7 @@ fun GameScreen(
     if (showKeyBindingDialog) {
         KeyBindingSettingsDialog(
             keyBindingSettings = keyBindings,
+            gameSettings = gameSettings,
             onDismiss = { showKeyBindingDialog = false }
         )
     }

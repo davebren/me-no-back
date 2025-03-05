@@ -2,6 +2,7 @@ package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.eski.menoback.ui.game.model.GameDuration
 
 class GameStatsData(val settings: Settings) {
     companion object {
@@ -15,12 +16,12 @@ class GameStatsData(val settings: Settings) {
     }
     
     // Map to store high scores for each game duration with default value 0
-    val highScores: Map<Int, MutableStateFlow<Int>> = GameSettings.AVAILABLE_DURATIONS.associateWith { duration ->
+    val highScores: Map<Int, MutableStateFlow<Int>> = GameDuration.secondsList.associateWith { duration ->
         MutableStateFlow(settings.getInt(highScoreKey(duration), 0))
     }.toMutableMap()
     
     // Map to store n-back levels for each game duration with default value 1
-    val nbackLevels = GameSettings.AVAILABLE_DURATIONS.associateWith { duration ->
+    val nbackLevels = GameDuration.secondsList.associateWith { duration ->
         MutableStateFlow(settings.getInt(nBackLevelKey(duration), 1))
     }.toMutableMap()
     
@@ -39,7 +40,7 @@ class GameStatsData(val settings: Settings) {
     
     // Reset all high scores and n-back levels
     fun resetAllStats() {
-        GameSettings.AVAILABLE_DURATIONS.forEach { duration ->
+        GameDuration.secondsList.forEach { duration ->
             highScores[duration]?.value = 0
             nbackLevels[duration]?.value = 1
             

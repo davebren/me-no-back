@@ -26,12 +26,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import org.eski.menoback.data.gameSettings
+import org.eski.menoback.ui.game.data.GameSettings
+import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.util.getKeyName
 
 @Composable
 fun KeyBindingSettingsDialog(
   keyBindingSettings: KeyBindingSettings,
-  onDismiss: () -> Unit
+  gameSettings: GameSettings,
+  onDismiss: () -> Unit,
 ) {
   Dialog(
     onDismissRequest = onDismiss,
@@ -43,6 +47,7 @@ fun KeyBindingSettingsDialog(
   ) {
     KeyBindingSettingsDialogContent(
       keyBindingSettings = keyBindingSettings,
+      gameSettings = gameSettings,
       onDismiss = onDismiss
     )
   }
@@ -51,6 +56,7 @@ fun KeyBindingSettingsDialog(
 @Composable
 private fun KeyBindingSettingsDialogContent(
   keyBindingSettings: KeyBindingSettings,
+  gameSettings: org.eski.menoback.ui.game.data.GameSettings,
   onDismiss: () -> Unit
 ) {
   val scrollState = rememberScrollState()
@@ -64,6 +70,9 @@ private fun KeyBindingSettingsDialogContent(
   val dropPiece by keyBindingSettings.dropPiece.collectAsState()
   val nbackMatch by keyBindingSettings.nbackMatch.collectAsState()
   val togglePlayPause by keyBindingSettings.togglePlayPause.collectAsState()
+
+  // Get current feedback mode
+  val feedbackMode by gameSettings.feedbackMode.collectAsState()
 
   var selectedBinding by remember { mutableStateOf<String?>(null) }
   val focusRequester = remember { FocusRequester() }
@@ -86,7 +95,7 @@ private fun KeyBindingSettingsDialogContent(
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
-          text = "Keyboard Controls",
+          text = "Game Settings",
           color = Color.White,
           fontSize = 22.sp,
           fontWeight = FontWeight.Bold,
@@ -116,22 +125,56 @@ private fun KeyBindingSettingsDialogContent(
         modifier = Modifier.padding(vertical = 8.dp)
       )
 
-      Text(
-        text = "Click on a control to rebind it",
-        color = Color.White.copy(alpha = 0.7f),
-        fontSize = 14.sp,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center
-      )
-
-      Spacer(modifier = Modifier.height(16.dp))
-
       // Key binding list
       Column(
         modifier = Modifier
           .weight(1f)
           .verticalScroll(scrollState)
       ) {
+        // Feedback Mode Section
+        SectionHeader(text = "Game Feedback")
+
+        Text(
+          text = "Visual Feedback Mode",
+          color = Color.White,
+          fontSize = 15.sp,
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+        )
+
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          FeedbackOptionButton(
+            text = "None",
+            isSelected = feedbackMode == FeedbackMode.none,
+            onClick = { gameSettings.setFeedbackMode(FeedbackMode.none) }
+          )
+
+          FeedbackOptionButton(
+            text = "Flash Background",
+            isSelected = feedbackMode == FeedbackMode.flashBackground,
+            onClick = { gameSettings.setFeedbackMode(FeedbackMode.flashBackground) }
+          )
+        }
+
+        // Keyboard Controls Section
+        SectionHeader(text = "Keyboard Controls")
+
+        Text(
+          text = "Click on a control to rebind it",
+          color = Color.White.copy(alpha = 0.7f),
+          fontSize = 14.sp,
+          modifier = Modifier.fillMaxWidth(),
+          textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         SectionHeader(text = "Game Controls")
 
         KeyBindingRow(
@@ -264,6 +307,24 @@ private fun KeyBindingSettingsDialogContent(
         focusRequester.requestFocus()
       }
     }
+  }
+}
+
+@Composable
+fun RowScope.FeedbackOptionButton(
+  text: String,
+  isSelected: Boolean,
+  onClick: () -> Unit
+) {
+  Button(
+    onClick = onClick,
+    colors = ButtonDefaults.buttonColors(
+      backgroundColor = if (isSelected) Color(0xFF4CAF50) else Color(0xFF666666),
+      contentColor = Color.White
+    ),
+    modifier = Modifier.weight(1f)
+  ) {
+    Text(text = text)
   }
 }
 
