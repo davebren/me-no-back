@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import org.eski.menoback.data.gameSettings
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.util.getKeyName
@@ -56,7 +55,7 @@ fun KeyBindingSettingsDialog(
 @Composable
 private fun KeyBindingSettingsDialogContent(
   keyBindingSettings: KeyBindingSettings,
-  gameSettings: org.eski.menoback.ui.game.data.GameSettings,
+  gameSettings: GameSettings,
   onDismiss: () -> Unit
 ) {
   val scrollState = rememberScrollState()
@@ -69,7 +68,8 @@ private fun KeyBindingSettingsDialogContent(
   val rotate180 by keyBindingSettings.rotate180.collectAsState()
   val dropPiece by keyBindingSettings.dropPiece.collectAsState()
   val nbackMatch by keyBindingSettings.nbackMatch.collectAsState()
-  val togglePlayPause by keyBindingSettings.togglePlayPause.collectAsState()
+  val startGame by keyBindingSettings.startGame.collectAsState()
+  val pauseGame by keyBindingSettings.pauseGame.collectAsState()
 
   // Get current feedback mode
   val feedbackMode by gameSettings.feedbackMode.collectAsState()
@@ -178,10 +178,17 @@ private fun KeyBindingSettingsDialogContent(
         SectionHeader(text = "Game Controls")
 
         KeyBindingRow(
-          label = "Start/Pause Game",
-          keyName = getKeyName(togglePlayPause),
-          isSelected = selectedBinding == "togglePlayPause",
-          onClick = { selectedBinding = "togglePlayPause" }
+          label = "Start Game",
+          keyName = getKeyName(startGame),
+          isSelected = selectedBinding == "startGame",
+          onClick = { selectedBinding = "startGame" }
+        )
+
+        KeyBindingRow(
+          label = "Pause Game",
+          keyName = getKeyName(pauseGame),
+          isSelected = selectedBinding == "pauseGame",
+          onClick = { selectedBinding = "pauseGame" }
         )
 
         SectionHeader(text = "Movement")
@@ -292,7 +299,8 @@ private fun KeyBindingSettingsDialogContent(
                 "rotate180" -> keyBindingSettings.setRotate180(keyCode)
                 "dropPiece" -> keyBindingSettings.setDropPiece(keyCode)
                 "nbackMatch" -> keyBindingSettings.setNbackMatch(keyCode)
-                "togglePlayPause" -> keyBindingSettings.setTogglePlayPause(keyCode)
+                "startGame" -> keyBindingSettings.setStartGame(keyCode)
+                "pauseGame" -> keyBindingSettings.setPauseGame(keyCode)
               }
 
               selectedBinding = null

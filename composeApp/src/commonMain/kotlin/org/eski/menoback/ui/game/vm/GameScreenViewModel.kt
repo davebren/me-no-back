@@ -1,7 +1,6 @@
 package org.eski.menoback.ui.game.vm
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
@@ -98,12 +97,11 @@ class GameScreenViewModel(
     }
   }
 
-  fun toggleGameState() {
+  fun startGameKey() {
     when (gameState.value) {
-      GameState.NotStarted -> startGame()
-      GameState.Running -> pauseGame()
+      GameState.Running -> {}
       GameState.Paused -> resumeGame()
-      GameState.GameOver -> startGame()
+      GameState.NotStarted, GameState.GameOver -> startGame()
     }
   }
 
@@ -118,7 +116,7 @@ class GameScreenViewModel(
     }
   }
 
-  fun pauseGame() {
+  fun pauseBindingInvoked() {
     if (_gameState.value == GameState.Running) {
       _gameState.value = GameState.Paused
       gameJob?.cancel()

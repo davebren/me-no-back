@@ -17,7 +17,8 @@ class KeyBindingSettings(val settings: Settings) {
     private const val rotate180Key = "$settingsKey.rotate180"
     private const val dropPieceKey = "$settingsKey.dropPiece"
     private const val nbackMatchKey = "$settingsKey.nbackMatch"
-    private const val togglePlayPauseKey = "$settingsKey.togglePlayPause"
+    private const val startGameKey = "$settingsKey.startGame"
+    private const val pauseGameKey = "$settingsKey.pauseGame"
 
     private val defaultMoveLeft = Key.DirectionLeft.keyCode
     private val defaultMoveRight = Key.DirectionRight.keyCode
@@ -27,10 +28,10 @@ class KeyBindingSettings(val settings: Settings) {
     private val defaultRotate180 = Key.DirectionUp.keyCode
     private val defaultDropPiece = Key.Spacebar.keyCode
     private val defaultNbackMatch = Key.C.keyCode
-    private val defaultTogglePlayPause = Key.Enter.keyCode
+    private val defaultStartGame = Key.Enter.keyCode
+    private val defaultPauseGame = Key.Escape.keyCode
   }
 
-  // StateFlows for each keybinding
   private val _moveLeft = MutableStateFlow(settings.getLong(moveLeftKey, defaultMoveLeft))
   val moveLeft = _moveLeft.asStateFlow()
 
@@ -55,8 +56,11 @@ class KeyBindingSettings(val settings: Settings) {
   private val _nbackMatch = MutableStateFlow(settings.getLong(nbackMatchKey, defaultNbackMatch))
   val nbackMatch = _nbackMatch.asStateFlow()
 
-  private val _togglePlayPause = MutableStateFlow(settings.getLong(togglePlayPauseKey, defaultTogglePlayPause))
-  val togglePlayPause = _togglePlayPause.asStateFlow()
+  private val _startGame = MutableStateFlow(settings.getLong(startGameKey, defaultStartGame))
+  val startGame = _startGame.asStateFlow()
+
+  private val _pauseGame = MutableStateFlow(settings.getLong(pauseGameKey, defaultPauseGame))
+  val pauseGame = _pauseGame.asStateFlow()
 
   // Functions to update keybindings
   fun setMoveLeft(keyCode: Long) {
@@ -99,9 +103,14 @@ class KeyBindingSettings(val settings: Settings) {
     settings.putLong(nbackMatchKey, keyCode)
   }
 
-  fun setTogglePlayPause(keyCode: Long) {
-    _togglePlayPause.value = keyCode
-    settings.putLong(togglePlayPauseKey, keyCode)
+  fun setStartGame(keyCode: Long) {
+    _startGame.value = keyCode
+    settings.putLong(startGameKey, keyCode)
+  }
+
+  fun setPauseGame(keyCode: Long) {
+    _pauseGame.value = keyCode
+    settings.putLong(pauseGameKey, keyCode)
   }
 
   fun resetToDefaults() {
@@ -113,6 +122,7 @@ class KeyBindingSettings(val settings: Settings) {
     setRotate180(defaultRotate180)
     setDropPiece(defaultDropPiece)
     setNbackMatch(defaultNbackMatch)
-    setTogglePlayPause(defaultTogglePlayPause)
+    setStartGame(defaultStartGame)
+    setPauseGame(defaultPauseGame)
   }
 }

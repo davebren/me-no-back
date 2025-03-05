@@ -47,7 +47,8 @@ fun KeyboardInput(
   val rotate180 by keyBindingSettings.rotate180.collectAsState()
   val dropPiece by keyBindingSettings.dropPiece.collectAsState()
   val nbackMatch by keyBindingSettings.nbackMatch.collectAsState()
-  val togglePlayPause by keyBindingSettings.togglePlayPause.collectAsState()
+  val startGame by keyBindingSettings.startGame.collectAsState()
+  val pauseGame by keyBindingSettings.pauseGame.collectAsState()
 
   Box(modifier = Modifier
     .focusRequester(focusRequester)
@@ -62,7 +63,8 @@ fun KeyboardInput(
 
       if (event.type == KeyEventType.KeyDown) {
         when (keyCode) {
-          togglePlayPause -> vm.toggleGameState()
+          startGame -> vm.startGameKey()
+          pauseGame -> vm.pauseBindingInvoked()
 
           moveLeft -> {
             if (!leftPressed) {

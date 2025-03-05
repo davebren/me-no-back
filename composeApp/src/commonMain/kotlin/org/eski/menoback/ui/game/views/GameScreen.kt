@@ -69,7 +69,7 @@ fun GameScreen(
                 gameState = gameState,
                 onStartClicked = { vm.startGame() },
                 onResumeClicked = { vm.resumeGame() },
-                onPauseClicked = { vm.pauseGame() },
+                onPauseClicked = { vm.pauseBindingInvoked() },
                 onResetClicked = { vm.resetGame() }
             )
         }
