@@ -66,6 +66,7 @@ class GameScreenViewModel(
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Board())
 
   val nback = GameNbackViewModel(viewModelScope, _gameState, currentTetrimino)
+  val comboStreak = MutableStateFlow<Int>(0)
   val score = MutableStateFlow<Long>(0)
   private val gameSpeed = MutableStateFlow(initialGameTickRate)
 
@@ -271,7 +272,11 @@ class GameScreenViewModel(
     nback.clearMatchChoice()
     board.value = board.value.copy(boardUpdate)
     val completedLines = clearFilledRows()
-    addScore(completedLines)
+
+    if (completedLines > 0) comboStreak.value++
+    else comboStreak.value = 0
+
+    addScore(completedLines, comboStreak.value)
   }
 
   private fun clearFilledRows(): Int {
@@ -302,7 +307,7 @@ class GameScreenViewModel(
     return completedLines
   }
 
-  private fun addScore(completedLines: Int) {
+  private fun addScore(completedLines: Int, comboStreak: Int) {
     val baseScore = when (completedLines) {
       0 -> 20
       1 -> 100
@@ -311,7 +316,16 @@ class GameScreenViewModel(
       4 -> 1000
       else -> 0
     }
-    score.value += (baseScore * nback.multiplier.value).toLong()
+    val comboMultiplier = when(comboStreak) {
+      1 -> 1f
+      2 -> 1.25f
+      3 -> 2f
+      else -> {
+        if (comboStreak > 3) comboStreak.toFloat()
+        else 1f
+      }
+    }
+    score.value += (baseScore * comboMultiplier * nback.multiplier.value).toLong()
   }
 
   private fun spawnNewPiece(): Boolean {
