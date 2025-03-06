@@ -41,9 +41,8 @@ fun GameOverOverlay(
 ) {
     val gameState by vm.gameState.collectAsState()
     val score by vm.score.collectAsState()
-    val currentHighScoreFlow by vm.currentHighScore.collectAsState()
-    val currentHighScore = currentHighScoreFlow?.collectAsState()
-    val isNewHighScore = score >= (currentHighScore?.value ?: 0) && gameState == GameState.GameOver
+    val currentHighScore by vm.currentHighScore.collectAsState()
+    val isNewHighScore = score >= currentHighScore && gameState == GameState.GameOver
     
     // Only display the overlay when the game is over
     AnimatedVisibility(
@@ -63,14 +62,14 @@ fun GameOverOverlay(
             if (isNewHighScore) {
                 NewHighScoreContent(score = score)
             } else {
-                GameOverContent(score = score, highScore = currentHighScore?.value ?: 0)
+                GameOverContent(score = score, highScore = currentHighScore)
             }
         }
     }
 }
 
 @Composable
-private fun NewHighScoreContent(score: Int) {
+private fun NewHighScoreContent(score: Long) {
     val infiniteTransition = rememberInfiniteTransition()
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -114,7 +113,7 @@ private fun NewHighScoreContent(score: Int) {
 }
 
 @Composable
-private fun GameOverContent(score: Int, highScore: Int) {
+private fun GameOverContent(score: Long, highScore: Long) {
     Card(
         backgroundColor = Color(0xFF333333),
         shape = RoundedCornerShape(16.dp),

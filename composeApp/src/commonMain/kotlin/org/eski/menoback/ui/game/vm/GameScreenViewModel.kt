@@ -28,6 +28,7 @@ import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.data.gameStatsData as defaultGameStatsData
 import org.eski.util.deepCopy
+import org.eski.util.equalsIgnoreOrder
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -65,7 +66,7 @@ class GameScreenViewModel(
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Board())
 
   val nback = GameNbackViewModel(viewModelScope, _gameState, currentTetrimino)
-  val score = MutableStateFlow<Int>(0)
+  val score = MutableStateFlow<Long>(0)
   private val gameSpeed = MutableStateFlow(initialGameTickRate)
 
   private var gameJob: Job? = null
@@ -77,10 +78,14 @@ class GameScreenViewModel(
     if (it < warningThreshold) Color.Red else Color.LightGray
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Color.LightGray)
 
-  val currentHighScore: StateFlow<StateFlow<Int>?> = gameSettings.gameDuration.map { duration ->
-    gameStatsData.highScores[duration]
-  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
-  val currentHighScoreText = MutableStateFlow(gameStatsData.formatHighScoreText(gameSettings.gameDuration.value))
+  val currentHighScore: StateFlow<Long> = combine(gameSettings.gameDuration, gameSettings.nbackSetting, gameStatsData.lastScoreUpdate) {
+    duration, nback, lastScoreUpdate ->
+    if (lastScoreUpdate?.durationSeconds == duration && lastScoreUpdate.nback.equalsIgnoreOrder(nback)) {
+      lastScoreUpdate.score
+    } else gameStatsData.highScore(duration, nback)
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0)
+  val currentHighScoreText = currentHighScore.map { "High score: $it"}
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "")
 
   val feedbackMode = gameSettings.feedbackMode
 
@@ -91,7 +96,6 @@ class GameScreenViewModel(
       gameSettings.gameDuration.collect { duration ->
         if (_gameState.value == GameState.NotStarted) {
           timeRemaining.value = duration
-          currentHighScoreText.value = gameStatsData.formatHighScoreText(duration)
         }
       }
     }
@@ -170,11 +174,11 @@ class GameScreenViewModel(
 
   private fun gameOver() {
     val currentScore = score.value
-    val nBackLevel = nback.level.value
+    val nBack = gameSettings.nbackSetting.value
     val gameDuration = gameSettings.gameDuration.value
 
-    gameStatsData.updateHighScore(gameDuration, currentScore, nBackLevel)
-    currentHighScoreText.value = gameStatsData.formatHighScoreText(gameDuration)
+    if (currentScore > currentHighScore.value) gameStatsData.putHighScore(currentScore, gameDuration, nBack)
+    gameSettings.gameDuration.value = gameDuration.toInt() // TODO: Find a better way to update the current high score.
 
     _gameState.value = GameState.GameOver
     gameJob?.cancel()
@@ -307,7 +311,7 @@ class GameScreenViewModel(
       4 -> 1000
       else -> 0
     }
-    score.value += (baseScore * nback.multiplier.value).toInt()
+    score.value += (baseScore * nback.multiplier.value).toLong()
   }
 
   private fun spawnNewPiece(): Boolean {

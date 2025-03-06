@@ -92,13 +92,13 @@ fun GameControls(
 fun NBackControls(
   vm: GameScreenViewModel,
 ) {
-  val nbackLevel by vm.nback.level.collectAsState()
+  val level by vm.nback.level.collectAsState()
 
   Column(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Text(
-      text = "$nbackLevel-Back Match?",
+      text = "$level-Back Match?",
       fontSize = 16.sp,
       fontWeight = FontWeight.Bold,
       color = Color.LightGray,
