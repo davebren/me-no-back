@@ -45,6 +45,7 @@ class GameNbackViewModel(
   fun reset() {
     matchStats.value = MatchStats()
     streak.value = 0
+    multiplier.value = 1f
   }
 
   // TODO: Support multiple stimuli.
