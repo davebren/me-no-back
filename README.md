@@ -14,7 +14,6 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 - Intro guide
 - Mac toolbar styling
 - Recursive gravity
-- Match stats at end game
 - Add invisible top row
 - Dig mode
 - Lock n-back levels and create progression requiring match %

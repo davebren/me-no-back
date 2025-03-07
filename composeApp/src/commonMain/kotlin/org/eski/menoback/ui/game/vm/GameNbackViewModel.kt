@@ -6,12 +6,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.eski.menoback.data.gameSettings
+import org.eski.menoback.data.settings
 import org.eski.menoback.ui.game.model.MatchStats
 import org.eski.menoback.ui.game.model.Tetrimino
+import kotlin.math.max
 
 class GameNbackViewModel(
   val scope: CoroutineScope,
@@ -29,9 +32,7 @@ class GameNbackViewModel(
 
   val feedback = MutableStateFlow<FeedbackState>(FeedbackState.none)
 
-  val multiplier = combine(setting, streak) { setting, streak ->
-    1.0f + (streak * (setting.first().level * 2) * 0.1f) // TODO: Use all stimuli.
-  }.stateIn(scope, SharingStarted.Eagerly, 1f)
+  val multiplier = MutableStateFlow<Float>(1f)
 
   val multiplierText = multiplier.map {
     if (!it.toString().contains('.')) "${it}x"
@@ -62,6 +63,7 @@ class GameNbackViewModel(
       incorrectMatches = oldStats.incorrectMatches + if (!correct) 1 else 0
     )
 
+    updateMultiplier(correct)
     streak.value = if (correct) { streak.value + 1 } else 0
     feedback.value = if (correct) FeedbackState.correct else FeedbackState.incorrect
 
@@ -87,6 +89,7 @@ class GameNbackViewModel(
       missedMatches = oldStats.incorrectMatches + if (!correct) 1 else 0
     )
 
+    updateMultiplier(correct)
     streak.value = if (correct) { streak.value + 1 } else 0
 
     if (!correct) {
@@ -99,6 +102,11 @@ class GameNbackViewModel(
   }
 
   fun clearMatchChoice() { matchChoiceMade = false }
+
+  private fun updateMultiplier(correct: Boolean) {
+    return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
+      else multiplier.value += (setting.value.first().level * 0.2f)
+  }
 
   enum class FeedbackState {
     correct,
