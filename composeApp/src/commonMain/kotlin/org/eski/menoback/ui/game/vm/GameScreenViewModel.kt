@@ -144,7 +144,8 @@ class GameScreenViewModel(
     currentTetrimino.value = null
     nextTetriminos.value = emptyList()
     tetriminoHistory.clear()
-    nback.streak.value = 0
+    nback.reset()
+    comboStreak.value = 0
     score.value = 0
     gameSpeed.value = initialGameTickRate
     timeRemaining.value = gameSettings.gameDuration.value
