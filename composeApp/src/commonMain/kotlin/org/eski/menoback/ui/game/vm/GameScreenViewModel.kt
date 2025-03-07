@@ -37,7 +37,7 @@ import kotlin.random.Random
 const val nbackBaseMatchChance = 0.2f
 const val nbackMatchChanceGrowthFactor = 0.1f
 const val nbackMatchChanceDecayFactor = 0.05f
-const val initialGameTickRate = 10000L
+const val initialGameTickRate = 1000L
 
 class GameScreenViewModel(
   private val gameSettings: GameSettings,
