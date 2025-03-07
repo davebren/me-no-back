@@ -1,7 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.internal.types.error.ErrorModuleDescriptor.platform
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -9,6 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.serialization)
 }
 
 val version = "1.0.1"
@@ -88,6 +88,7 @@ kotlin {
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.kotlinx.coroutines)
             implementation(libs.kotlinx.dateTime)
+            implementation(libs.kotlin.serialization)
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.no.arg)
         }
