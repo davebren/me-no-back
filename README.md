@@ -21,4 +21,3 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 - Blind mode
 
 ### Bugs
-- Well filled end condition (pieces overlaying)

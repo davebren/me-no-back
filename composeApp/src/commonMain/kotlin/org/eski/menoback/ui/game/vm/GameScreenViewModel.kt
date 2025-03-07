@@ -37,7 +37,7 @@ import kotlin.random.Random
 const val nbackBaseMatchChance = 0.2f
 const val nbackMatchChanceGrowthFactor = 0.1f
 const val nbackMatchChanceDecayFactor = 0.05f
-const val initialGameTickRate = 1000L
+const val initialGameTickRate = 10000L
 
 class GameScreenViewModel(
   private val gameSettings: GameSettings,
@@ -167,10 +167,7 @@ class GameScreenViewModel(
 
     if (!moveTetriminoDown()) {
       lockTetrimino()
-
-      if (!spawnNewPiece()) {
-        gameOver()
-      }
+      if (!spawnNewPiece()) gameOver()
     }
   }
 
@@ -232,7 +229,7 @@ class GameScreenViewModel(
 
     while (moveTetriminoDown());
     lockTetrimino()
-    spawnNewPiece()
+    if (!spawnNewPiece()) gameOver()
   }
 
   fun downClicked(): Boolean {
