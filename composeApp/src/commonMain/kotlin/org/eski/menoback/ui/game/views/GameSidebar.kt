@@ -23,12 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.eski.menoback.ui.game.model.Tetrimino
 import org.eski.menoback.ui.TetriminoColors
 import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
-import org.eski.menoback.ui.utils.grid
-import org.eski.menoback.ui.utils.grid2
+import org.eski.ui.util.grid
+import org.eski.ui.util.grid2
 
 
 @Composable

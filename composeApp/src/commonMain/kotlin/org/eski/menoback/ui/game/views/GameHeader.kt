@@ -8,7 +8,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,8 +22,8 @@ import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.game.data.GameSettings
-import org.eski.menoback.ui.utils.grid3
-import org.eski.menoback.ui.utils.gridHalf
+import org.eski.ui.util.grid3
+import org.eski.ui.util.gridHalf
 
 @Composable
 fun GameHeader(

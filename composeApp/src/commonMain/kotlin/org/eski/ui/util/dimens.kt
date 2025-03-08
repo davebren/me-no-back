@@ -1,4 +1,4 @@
-package org.eski.menoback.ui.utils
+package org.eski.ui.util
 
 import androidx.compose.ui.unit.dp
 

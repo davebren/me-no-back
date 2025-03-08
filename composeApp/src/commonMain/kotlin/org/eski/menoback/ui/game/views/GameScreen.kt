@@ -21,7 +21,7 @@ import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.keybinding.KeyboardInput
-import org.eski.menoback.ui.utils.grid2
+import org.eski.ui.util.grid2
 
 @Composable
 fun GameScreen(

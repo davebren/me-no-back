@@ -140,7 +140,7 @@ class GameNbackViewModel(
 
   private fun updateMultiplier(correct: Boolean) {
     return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
-      else multiplier.value += (setting.value.first().level * 0.2f)
+      else multiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
   }
 
   enum class FeedbackState {
