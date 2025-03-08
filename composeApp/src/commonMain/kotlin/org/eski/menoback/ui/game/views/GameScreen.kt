@@ -73,7 +73,10 @@ fun GameScreen(
 
         IconButton(
             modifier = Modifier.align(alignment = Alignment.BottomEnd),
-            onClick = { showKeyBindingDialog = true }
+            onClick = {
+                vm.pauseBindingInvoked()
+                showKeyBindingDialog = true
+            }
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
