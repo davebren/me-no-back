@@ -119,7 +119,7 @@ class GameScreenViewModel(
 
   fun startGame() {
     if (_gameState.value != GameState.Running) {
-      resetGame()
+      quitGame()
       _gameState.value = GameState.Running
       fillNextPieces()
       spawnNewPiece()
@@ -144,7 +144,7 @@ class GameScreenViewModel(
     }
   }
 
-  fun resetGame() {
+  fun quitGame() {
     gameJob?.cancel()
     timerJob?.cancel()
     board.value = Board()

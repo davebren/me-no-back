@@ -22,9 +22,9 @@ import org.eski.menoback.ui.keybinding.KeyBindingSettingsDialog
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.FeedbackMode
+import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.keybinding.KeyboardInput
 import org.eski.ui.util.grid2
-import org.eski.ui.util.grid4
 import org.eski.ui.util.grid6
 import org.eski.ui.util.gridHalf
 
@@ -85,9 +85,10 @@ fun GameScreen(
                 GameSidebar(vm)
             }
 
-            GameStatus(vm, gameState = gameState, onResetClicked = { vm.resetGame() })
+            GameStatus(vm, gameState = gameState, onResetClicked = { vm.quitGame() })
         }
 
+        GameQuitButton(visible = gameState == GameState.Paused, containerSize = size, onExpanded = { vm.quitGame() })
         GameStartButton(vm, true, containerSize = size)
     }
 

@@ -97,7 +97,7 @@ enum class PressExpandButtonState {
 fun PressExpandButton(
   modifier: Modifier = Modifier,
   unexpandableClickable: (() -> Unit)? = null,
-  expandable: Boolean,
+  expandable: Boolean = true,
   offset: DpOffset,
   expandedSize: IntSize,
   text: String? = null,

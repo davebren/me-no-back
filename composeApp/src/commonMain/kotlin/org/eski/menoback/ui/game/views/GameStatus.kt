@@ -62,22 +62,5 @@ fun GameStatus(
       textAlign = TextAlign.Center,
       color = Color.LightGray,
     )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Game control buttons
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-      Button(
-        onClick = onResetClicked,
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
-      ) {
-        Icon(Icons.Filled.Close, contentDescription = "Reset")
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Reset")
-      }
-    }
   }
 }
