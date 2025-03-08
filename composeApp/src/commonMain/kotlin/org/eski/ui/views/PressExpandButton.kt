@@ -1,7 +1,6 @@
-package ui
+package org.eski.ui.views
 
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
@@ -10,6 +9,7 @@ import androidx.compose.animation.core.animateInt
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -42,16 +42,16 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import topWindowInset
-import ui.PressExpandButtonState.Companion.cornerRadiusMap
-import ui.PressExpandButtonState.Companion.elevationMap
-import ui.PressExpandButtonState.Companion.textSizeMap
-import ui.PressExpandButtonState.Companion.transitionSpecColor
-import ui.PressExpandButtonState.Companion.transitionSpecDp
-import ui.PressExpandButtonState.Companion.transitionSpecInt
-import ui.PressExpandButtonState.expanded
-import ui.PressExpandButtonState.pressed
-import ui.PressExpandButtonState.unpressed
+import org.eski.ui.util.topWindowInset
+import org.eski.ui.views.PressExpandButtonState.Companion.cornerRadiusMap
+import org.eski.ui.views.PressExpandButtonState.Companion.elevationMap
+import org.eski.ui.views.PressExpandButtonState.Companion.textSizeMap
+import org.eski.ui.views.PressExpandButtonState.Companion.transitionSpecColor
+import org.eski.ui.views.PressExpandButtonState.Companion.transitionSpecDp
+import org.eski.ui.views.PressExpandButtonState.Companion.transitionSpecInt
+import org.eski.ui.views.PressExpandButtonState.expanded
+import org.eski.ui.views.PressExpandButtonState.pressed
+import org.eski.ui.views.PressExpandButtonState.unpressed
 
 
 enum class PressExpandButtonState {
@@ -93,17 +93,19 @@ enum class PressExpandButtonState {
   }
 }
 
-@OptIn(ExperimentalTransitionApi::class)
 @Composable
 fun PressExpandButton(
+  modifier: Modifier = Modifier,
+  unexpandableClickable: (() -> Unit)? = null,
+  expandable: Boolean,
   offset: DpOffset,
   expandedSize: IntSize,
   text: String? = null,
   unexpandedZIndex: Float = 0f,
   expandedZIndex: Float = 1f,
-  backgroundColor: PressExpandButtonState.Map<Color> = PressExpandButtonState.Map(AppColors.button(), AppColors.buttonPressed()),
+  backgroundColor: PressExpandButtonState.Map<Color> = PressExpandButtonState.Map(pressed = Color.Gray, unpressed = Color.DarkGray),
   border: BorderStroke? = null,
-  textColor: PressExpandButtonState.Map<Color> = PressExpandButtonState.Map(AppColors.buttonText()),
+  textColor: PressExpandButtonState.Map<Color> = PressExpandButtonState.Map(Color.White),
   textSize: PressExpandButtonState.Map<Int> = textSizeMap,
   elevation: PressExpandButtonState.Map<Dp> = elevationMap,
   horizontalPadding: Dp = 16.dp,
@@ -176,29 +178,27 @@ fun PressExpandButton(
   val backgroundAnimated by transition.animateColor(transitionSpecColor) { targetState -> backgroundColor.stateValue(targetState) }
   val cornerRadiusAnimated by transition.animateDp(transitionSpecDp) { targetState -> cornerRadius.stateValue(targetState) }
 
-  Box(modifier = Modifier
+  Box(modifier = modifier
     .offset(xOffset, yOffset)
     .zIndex(if (buttonState.targetState == expanded || buttonState.currentState == expanded) expandedZIndex else unexpandedZIndex)
     .padding(end = endPaddingAnimated, bottom = bottomPaddingAnimated)
     .size(widthAnimated + endPaddingAnimated, heightAnimated + bottomPaddingAnimated)
   ) {
+    var cardModifier = Modifier.size(widthAnimated, heightAnimated)
+    if (expandable) cardModifier = cardModifier.pointerInput(Unit, pointerBlock(buttonState, expandedStateFlow, clickableState))
+    if (!expandable && unexpandableClickable != null) cardModifier = cardModifier.clickable(onClick = unexpandableClickable)
     Card(
       backgroundColor = backgroundAnimated,
       elevation = elevationAnimated,
       shape = RoundedCornerShape(cornerRadiusAnimated),
       border = border,
-      modifier = Modifier
-        .width(widthAnimated)
-        .height(heightAnimated)
-        .pointerInput(Unit, pointerBlock(buttonState, expandedStateFlow, clickableState))
+      modifier = cardModifier
     ) {
       content?.invoke(transition)
       if (text != null) basicTextContent(transition, text, textColor, textSize, size.stateValue(unpressed).height)
     }
   }
 }
-
-
 
 @Composable
 fun basicTextContent(

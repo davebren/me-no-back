@@ -32,9 +32,6 @@ fun GameStatus(
   vm: GameScreenViewModel,
   modifier: Modifier = Modifier,
   gameState: GameState,
-  onStartClicked: () -> Unit,
-  onResumeClicked: () -> Unit,
-  onPauseClicked: () -> Unit,
   onResetClicked: () -> Unit
 ) {
   Column(
@@ -73,48 +70,6 @@ fun GameStatus(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-      when (gameState) {
-        GameState.NotStarted -> {
-          Button(
-            onClick = onStartClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
-          ) {
-            Icon(Icons.Filled.PlayArrow, contentDescription = "Start")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Start")
-          }
-        }
-        GameState.Running -> {
-          Button(
-            onClick = onPauseClicked
-          ) {
-            Icon(Icons.Filled.Pause, contentDescription = "Pause")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Pause")
-          }
-        }
-        GameState.Paused -> {
-          Button(
-            onClick = onResumeClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
-          ) {
-            Icon(Icons.Filled.PlayArrow, contentDescription = "Resume")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Resume")
-          }
-        }
-        GameState.GameOver -> {
-          Button(
-            onClick = onStartClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
-          ) {
-            Icon(Icons.Filled.Refresh, contentDescription = "Play Again")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Play Again")
-          }
-        }
-      }
-
       Button(
         onClick = onResetClicked,
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)

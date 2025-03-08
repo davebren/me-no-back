@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.eski.menoback.data.keyBindingSettings
@@ -35,6 +37,7 @@ fun GameScreen(
     val gameState by vm.gameState.collectAsState()
     val feedbackMode by vm.feedbackMode.collectAsState()
     var showKeyBindingDialog by remember { mutableStateOf(false) }
+    var size by remember { mutableStateOf(IntSize(0, 0)) }
 
     KeyboardInput(vm, keyBindings)
 
@@ -45,6 +48,7 @@ fun GameScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.DarkGray)
+            .onSizeChanged { size = it }
     ) {
         Column(
             modifier = Modifier
@@ -64,14 +68,7 @@ fun GameScreen(
                 GameSidebar(vm)
             }
 
-            GameStatus(
-                vm,
-                gameState = gameState,
-                onStartClicked = { vm.startGame() },
-                onResumeClicked = { vm.resumeGame() },
-                onPauseClicked = { vm.pauseBindingInvoked() },
-                onResetClicked = { vm.resetGame() }
-            )
+            GameStatus(vm, gameState = gameState, onResetClicked = { vm.resetGame() })
         }
 
         IconButton(
@@ -84,6 +81,8 @@ fun GameScreen(
                 tint = Color.White
             )
         }
+
+        GameStartButton(vm, true, containerSize = size)
     }
 
     if (showKeyBindingDialog) {

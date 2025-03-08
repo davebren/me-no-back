@@ -52,6 +52,10 @@ class GameScreenViewModel(
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
+  val startButtonClickable = gameState.map {
+    it == GameState.GameOver || it == GameState.NotStarted || it == GameState.Paused
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
+
   val currentTetrimino = MutableStateFlow<TetriminoHistory.Entry?>(null)
   val currentPiecePosition = MutableStateFlow<Tetrimino.Position?>(null)
   val nextTetriminos = MutableStateFlow<List<TetriminoHistory.Entry>>(emptyList())
@@ -366,7 +370,6 @@ class GameScreenViewModel(
         val nextTetrimino = unpickedNextPieces.random()
         val nextColor = if (nback.colorNbackEnabled.value) NbackTetriminoColor.random()
           else NbackTetriminoColor.fromIndex(nextTetrimino.type)
-        println("nextColor: $nextColor")
         TetriminoHistory.Entry(nextTetrimino, nextColor)
       }
 
