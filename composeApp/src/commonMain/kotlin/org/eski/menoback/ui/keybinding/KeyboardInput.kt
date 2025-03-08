@@ -22,6 +22,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.delay
+import org.eski.menoback.data.gameSettings
 import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
@@ -47,9 +48,13 @@ fun KeyboardInput(
   val rotateCounterClockwise by keyBindingSettings.rotateCounterClockwise.collectAsState()
   val rotate180 by keyBindingSettings.rotate180.collectAsState()
   val dropPiece by keyBindingSettings.dropPiece.collectAsState()
-  val nbackMatch by keyBindingSettings.nbackMatch.collectAsState()
+  val nbackShapeMatch by keyBindingSettings.nbackShapeMatch.collectAsState()
+  val nbackColorMatch by keyBindingSettings.nbackColorMatch.collectAsState()
   val startGame by keyBindingSettings.startGame.collectAsState()
   val pauseGame by keyBindingSettings.pauseGame.collectAsState()
+
+  val nbackSettings by gameSettings.nbackSetting.collectAsState()
+  val colorNbackEnabled = nbackSettings.find { it.type == NbackStimulus.Type.color } != null
 
   Box(modifier = Modifier
     .focusRequester(focusRequester)
@@ -94,7 +99,8 @@ fun KeyboardInput(
           }
 
           dropPiece -> vm.dropPiece()
-          nbackMatch -> vm.nbackMatchChoice(NbackStimulus.Type.block)
+          nbackShapeMatch -> vm.nbackMatchChoice(NbackStimulus.Type.block)
+          nbackColorMatch -> if (colorNbackEnabled) vm.nbackMatchChoice(NbackStimulus.Type.color)
         }
       }
 

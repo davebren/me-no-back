@@ -67,7 +67,8 @@ private fun KeyBindingSettingsDialogContent(
   val rotateCounterClockwise by keyBindingSettings.rotateCounterClockwise.collectAsState()
   val rotate180 by keyBindingSettings.rotate180.collectAsState()
   val dropPiece by keyBindingSettings.dropPiece.collectAsState()
-  val nbackMatch by keyBindingSettings.nbackMatch.collectAsState()
+  val nbackShapeMatch by keyBindingSettings.nbackShapeMatch.collectAsState()
+  val nbackColorMatch by keyBindingSettings.nbackColorMatch.collectAsState()
   val startGame by keyBindingSettings.startGame.collectAsState()
   val pauseGame by keyBindingSettings.pauseGame.collectAsState()
 
@@ -247,10 +248,16 @@ private fun KeyBindingSettingsDialogContent(
         SectionHeader(text = "N-Back")
 
         KeyBindingRow(
-          label = "N-Back Match",
-          keyName = getKeyName(nbackMatch),
-          isSelected = selectedBinding == "nbackMatch",
-          onClick = { selectedBinding = "nbackMatch" }
+          label = "N-Back Shape Match",
+          keyName = getKeyName(nbackShapeMatch),
+          isSelected = selectedBinding == "nbackShapeMatch",
+          onClick = { selectedBinding = "nbackShapeMatch" }
+        )
+        KeyBindingRow(
+          label = "N-Back Color Match",
+          keyName = getKeyName(nbackColorMatch),
+          isSelected = selectedBinding == "nbackColorMatch",
+          onClick = { selectedBinding = "nbackColorMatch" }
         )
       }
 
@@ -290,6 +297,7 @@ private fun KeyBindingSettingsDialogContent(
             if (event.type == KeyEventType.KeyDown) {
               val keyCode = event.key.keyCode
 
+              // TODO: Use enums.
               when (selectedBinding) {
                 "moveLeft" -> keyBindingSettings.setMoveLeft(keyCode)
                 "moveRight" -> keyBindingSettings.setMoveRight(keyCode)
@@ -298,7 +306,8 @@ private fun KeyBindingSettingsDialogContent(
                 "rotateCounterClockwise" -> keyBindingSettings.setRotateCounterClockwise(keyCode)
                 "rotate180" -> keyBindingSettings.setRotate180(keyCode)
                 "dropPiece" -> keyBindingSettings.setDropPiece(keyCode)
-                "nbackMatch" -> keyBindingSettings.setNbackMatch(keyCode)
+                "nbackShapeMatch" -> keyBindingSettings.setNbackShapeMatch(keyCode)
+                "nbackColorMatch" -> keyBindingSettings.setNbackColorMatch(keyCode)
                 "startGame" -> keyBindingSettings.setStartGame(keyCode)
                 "pauseGame" -> keyBindingSettings.setPauseGame(keyCode)
               }

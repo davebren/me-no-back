@@ -16,7 +16,8 @@ class KeyBindingSettings(val settings: Settings) {
     private const val rotateCounterClockwiseKey = "$settingsKey.rotateCounterClockwise"
     private const val rotate180Key = "$settingsKey.rotate180"
     private const val dropPieceKey = "$settingsKey.dropPiece"
-    private const val nbackMatchKey = "$settingsKey.nbackMatch"
+    private const val nbackShapeMatchKey = "$settingsKey.nbackMatch"
+    private const val nbackColorMatchKey = "$settingsKey.nbackColorMatch"
     private const val startGameKey = "$settingsKey.startGame"
     private const val pauseGameKey = "$settingsKey.pauseGame"
 
@@ -27,9 +28,11 @@ class KeyBindingSettings(val settings: Settings) {
     private val defaultRotateCounterClockwise = Key.Z.keyCode
     private val defaultRotate180 = Key.DirectionUp.keyCode
     private val defaultDropPiece = Key.Spacebar.keyCode
-    private val defaultNbackMatch = Key.C.keyCode
+    private val defaultNbackShapeMatch = Key.C.keyCode
+    private val defaultNbackColorMatch = Key.V.keyCode
     private val defaultStartGame = Key.Enter.keyCode
     private val defaultPauseGame = Key.Escape.keyCode
+
   }
 
   private val _moveLeft = MutableStateFlow(settings.getLong(moveLeftKey, defaultMoveLeft))
@@ -53,8 +56,10 @@ class KeyBindingSettings(val settings: Settings) {
   private val _dropPiece = MutableStateFlow(settings.getLong(dropPieceKey, defaultDropPiece))
   val dropPiece = _dropPiece.asStateFlow()
 
-  private val _nbackMatch = MutableStateFlow(settings.getLong(nbackMatchKey, defaultNbackMatch))
-  val nbackMatch = _nbackMatch.asStateFlow()
+  private val _nbackShapeMatch = MutableStateFlow(settings.getLong(nbackShapeMatchKey, defaultNbackShapeMatch))
+  val nbackShapeMatch = _nbackShapeMatch.asStateFlow()
+  private val _nbackColorMatch = MutableStateFlow(settings.getLong(nbackColorMatchKey, defaultNbackColorMatch))
+  val nbackColorMatch = _nbackColorMatch.asStateFlow()
 
   private val _startGame = MutableStateFlow(settings.getLong(startGameKey, defaultStartGame))
   val startGame = _startGame.asStateFlow()
@@ -98,9 +103,14 @@ class KeyBindingSettings(val settings: Settings) {
     settings.putLong(dropPieceKey, keyCode)
   }
 
-  fun setNbackMatch(keyCode: Long) {
-    _nbackMatch.value = keyCode
-    settings.putLong(nbackMatchKey, keyCode)
+  fun setNbackShapeMatch(keyCode: Long) {
+    _nbackShapeMatch.value = keyCode
+    settings.putLong(nbackShapeMatchKey, keyCode)
+  }
+
+  fun setNbackColorMatch(keyCode: Long) {
+    _nbackColorMatch.value = keyCode
+    settings.putLong(nbackColorMatchKey, keyCode)
   }
 
   fun setStartGame(keyCode: Long) {
@@ -121,7 +131,8 @@ class KeyBindingSettings(val settings: Settings) {
     setRotateCounterClockwise(defaultRotateCounterClockwise)
     setRotate180(defaultRotate180)
     setDropPiece(defaultDropPiece)
-    setNbackMatch(defaultNbackMatch)
+    setNbackShapeMatch(defaultNbackShapeMatch)
+    setNbackColorMatch(defaultNbackColorMatch)
     setStartGame(defaultStartGame)
     setPauseGame(defaultPauseGame)
   }
