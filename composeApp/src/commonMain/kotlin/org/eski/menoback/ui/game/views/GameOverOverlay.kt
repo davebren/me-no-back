@@ -48,7 +48,7 @@ fun GameOverOverlay(
     val currentHighScore by vm.currentHighScore.collectAsState()
     val matchStats by vm.nback.matchStats.collectAsState()
     val nbackLevel by vm.nback.level.collectAsState()
-    val isNewHighScore = score > currentHighScore && gameState == GameState.GameOver
+    val isNewHighScore = score >= currentHighScore && gameState == GameState.GameOver
 
     // Only display the overlay when the game is over
     AnimatedVisibility(
