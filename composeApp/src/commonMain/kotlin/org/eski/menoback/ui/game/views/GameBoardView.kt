@@ -67,5 +67,6 @@ fun GameBoard(
     }
 
     GameOverOverlay(vm = vm)
+    PauseOverlay(vm)
   }
 }

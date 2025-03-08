@@ -96,8 +96,6 @@ class GameNbackViewModel(
       return
     }
     currentTetriminoMatchChoicesEntered[type] = true
-    println("noMatchChoice: ${type.name}")
-
 
     val correct = if (tetriminoHistory.size > setting.value.first().level) {
       val nBackPiece = tetriminoHistory[tetriminoHistory.size - setting.value.first().level - 1]
