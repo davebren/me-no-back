@@ -92,7 +92,7 @@ fun GameStartButton(
           horizontalPadding = grid2,
           verticalPadding = verticalPadding,
           cornerRadius = PressExpandButtonState.Map(unpressed = 40.dp, pressed = 44.dp, expanded = 0.dp),
-          backgroundColor = PressExpandButtonState.staticMap(Color.Green),
+          backgroundColor = PressExpandButtonState.staticMap(Color(0x0b, 0x93, 0x0b)),
           border = BorderStroke(4.dp, Color.DarkGray),
           clickable = vm.startButtonClickable,
         ) { transition ->

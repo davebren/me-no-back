@@ -24,6 +24,9 @@ import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.keybinding.KeyboardInput
 import org.eski.ui.util.grid2
+import org.eski.ui.util.grid4
+import org.eski.ui.util.grid6
+import org.eski.ui.util.gridHalf
 
 @Composable
 fun GameScreen(
@@ -50,6 +53,20 @@ fun GameScreen(
             .background(color = Color.DarkGray)
             .onSizeChanged { size = it }
     ) {
+        IconButton(
+            modifier = Modifier.align(alignment = Alignment.TopEnd).size(grid6).padding(gridHalf),
+            onClick = {
+                vm.pauseBindingInvoked()
+                showKeyBindingDialog = true
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = Color.White,
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,20 +86,6 @@ fun GameScreen(
             }
 
             GameStatus(vm, gameState = gameState, onResetClicked = { vm.resetGame() })
-        }
-
-        IconButton(
-            modifier = Modifier.align(alignment = Alignment.BottomEnd),
-            onClick = {
-                vm.pauseBindingInvoked()
-                showKeyBindingDialog = true
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Settings",
-                tint = Color.White
-            )
         }
 
         GameStartButton(vm, true, containerSize = size)
