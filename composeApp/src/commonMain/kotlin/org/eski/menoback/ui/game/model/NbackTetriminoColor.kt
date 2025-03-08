@@ -1,5 +1,7 @@
 package org.eski.menoback.ui.game.model
 
+import kotlin.random.Random
+
 
 enum class NbackTetriminoColor(val colorIndex: Int) {
   one(1),
@@ -13,5 +15,9 @@ enum class NbackTetriminoColor(val colorIndex: Int) {
   companion object {
     fun fromIndex(index: Int): NbackTetriminoColor =
       entries.find { it.colorIndex == index } ?: one
+
+    fun random(): NbackTetriminoColor {
+      return fromIndex(Random.nextInt(1, 8))
+    }
   }
 }

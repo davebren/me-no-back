@@ -364,7 +364,9 @@ class GameScreenViewModel(
         nextPieces.getOrNull(nextPieces.size - nbackLevel) ?: throw IllegalStateException()
       } else {
         val nextTetrimino = unpickedNextPieces.random()
-        val nextColor = NbackTetriminoColor.fromIndex(nextTetrimino.type) // TODO: Check for color n-back stimulus and randomize.
+        val nextColor = if (nback.colorNbackEnabled.value) NbackTetriminoColor.random()
+          else NbackTetriminoColor.fromIndex(nextTetrimino.type)
+        println("nextColor: $nextColor")
         TetriminoHistory.Entry(nextTetrimino, nextColor)
       }
 
