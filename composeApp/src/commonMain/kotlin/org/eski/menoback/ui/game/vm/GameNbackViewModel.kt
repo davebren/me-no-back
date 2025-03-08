@@ -5,23 +5,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.eski.menoback.data.gameSettings
-import org.eski.menoback.data.settings
 import org.eski.menoback.ui.game.model.MatchStats
-import org.eski.menoback.ui.game.model.Tetrimino
+import org.eski.menoback.ui.game.model.NbackStimulus
+import org.eski.menoback.ui.game.model.TetriminoHistory
 import kotlin.math.max
 
 class GameNbackViewModel(
   val scope: CoroutineScope,
   val gameState: MutableStateFlow<GameState>,
-  val currentTetrimino: MutableStateFlow<Tetrimino?>,
+  val currentTetrimino: MutableStateFlow<TetriminoHistory.Entry?>,
 ) {
-  var matchChoiceMade = false; private set
+  val currentTetriminoMatchChoicesEntered = NbackStimulus.Type.entries.associateWith { false }.toMutableMap()
 
   val setting = gameSettings.nbackSetting
   val level: StateFlow<Int> = setting.map { it.first().level }
@@ -48,21 +46,34 @@ class GameNbackViewModel(
     multiplier.value = 1f
   }
 
-  // TODO: Support multiple stimuli.
-  fun matchChoice(tetriminoHistory: List<Tetrimino>) {
-    if (gameState.value != GameState.Running || matchChoiceMade) return
-    matchChoiceMade = true
+  fun matchChoice(tetriminoHistory: List<TetriminoHistory.Entry>, type: NbackStimulus.Type) {
+    if (gameState.value != GameState.Running
+      || currentTetriminoMatchChoicesEntered[type] ?: throw IllegalArgumentException()) {
+      return
+    }
+    currentTetriminoMatchChoicesEntered[type] = true
+    println("matchChoice: ${type.name}")
 
     val correct = if (tetriminoHistory.size > setting.value.first().level) {
       val nBackPiece = tetriminoHistory[tetriminoHistory.size - setting.value.first().level - 1]
-      currentTetrimino.value?.type == nBackPiece.type
+      when(type) {
+        NbackStimulus.Type.block -> currentTetrimino.value?.tetrimino?.type == nBackPiece.tetrimino.type
+        NbackStimulus.Type.color -> currentTetrimino.value?.colorType == nBackPiece.colorType
+      }
     } else false
 
     val oldStats = matchStats.value
-    matchStats.value = oldStats.copy(
-      correctMatches = oldStats.correctMatches + if (correct) 1 else 0,
-      incorrectMatches = oldStats.incorrectMatches + if (!correct) 1 else 0
-    )
+
+    matchStats.value = when(type) {
+      NbackStimulus.Type.block -> oldStats.copy(
+        correctShapeMatches = oldStats.correctShapeMatches + if (correct) 1 else 0,
+        incorrectShapeMatches = oldStats.incorrectShapeMatches + if (!correct) 1 else 0
+      )
+      NbackStimulus.Type.color -> oldStats.copy(
+        correctColorMatches = oldStats.correctColorMatches + if (correct) 1 else 0,
+        incorrectColorMatches = oldStats.incorrectColorMatches + if (correct) 1 else 0
+      )
+    }
 
     updateMultiplier(correct)
     streak.value = if (correct) { streak.value + 1 } else 0
@@ -74,21 +85,35 @@ class GameNbackViewModel(
     }
   }
 
-  // TODO: Support multiple stimuli.
-  fun noMatchChoice(tetriminoHistory: List<Tetrimino>) {
-    if (gameState.value != GameState.Running || matchChoiceMade) return
-    matchChoiceMade = true
+  fun noMatchChoice(tetriminoHistory: List<TetriminoHistory.Entry>, type: NbackStimulus.Type) {
+    if (gameState.value != GameState.Running
+      || currentTetriminoMatchChoicesEntered[type] ?: throw IllegalArgumentException()) {
+      return
+    }
+    currentTetriminoMatchChoicesEntered[type] = true
+    println("noMatchChoice: ${type.name}")
+
 
     val correct = if (tetriminoHistory.size > setting.value.first().level) {
       val nBackPiece = tetriminoHistory[tetriminoHistory.size - setting.value.first().level - 1]
-      currentTetrimino.value?.type != nBackPiece.type
+      when(type) {
+        NbackStimulus.Type.block -> currentTetrimino.value?.tetrimino?.type != nBackPiece.tetrimino.type
+        NbackStimulus.Type.color -> currentTetrimino.value?.colorType != nBackPiece.colorType
+      }
     } else true
 
     val oldStats = matchStats.value
-    matchStats.value = oldStats.copy(
-      correctNonMatches = oldStats.correctNonMatches + if (correct) 1 else 0,
-      missedMatches = oldStats.incorrectMatches + if (!correct) 1 else 0
-    )
+
+    matchStats.value = when(type) {
+      NbackStimulus.Type.block -> oldStats.copy(
+        correctShapeNonMatches = oldStats.correctShapeNonMatches + if (correct) 1 else 0,
+        missedShapeMatches = oldStats.missedShapeMatches + if (!correct) 1 else 0
+      )
+      NbackStimulus.Type.color -> oldStats.copy(
+        correctColorNonMatches = oldStats.correctColorNonMatches + if (correct) 1 else 0,
+        missedShapeMatches = oldStats.missedColorMatches + if (!correct) 1 else 0
+      )
+    }
 
     updateMultiplier(correct)
     streak.value = if (correct) { streak.value + 1 } else 0
@@ -102,7 +127,9 @@ class GameNbackViewModel(
     }
   }
 
-  fun clearMatchChoice() { matchChoiceMade = false }
+  fun clearMatchChoices() {
+    currentTetriminoMatchChoicesEntered.putAll(currentTetriminoMatchChoicesEntered.mapValues { false  })
+  }
 
   private fun updateMultiplier(correct: Boolean) {
     return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)

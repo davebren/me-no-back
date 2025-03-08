@@ -26,6 +26,9 @@ import org.eski.menoback.ui.TetriminoColors
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
+import org.eski.menoback.ui.game.model.NbackStimulus
+import org.eski.menoback.ui.game.model.NbackTetriminoColor
+import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.data.gameStatsData as defaultGameStatsData
 import org.eski.util.deepCopy
 import org.eski.util.equalsIgnoreOrder
@@ -49,20 +52,20 @@ class GameScreenViewModel(
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
-  val currentTetrimino = MutableStateFlow<Tetrimino?>(null)
+  val currentTetrimino = MutableStateFlow<TetriminoHistory.Entry?>(null)
   val currentPiecePosition = MutableStateFlow<Tetrimino.Position?>(null)
-  val nextTetriminos = MutableStateFlow<List<Tetrimino>>(emptyList())
+  val nextTetriminos = MutableStateFlow<List<TetriminoHistory.Entry>>(emptyList())
   val nextTetrimino = nextTetriminos.map {
     it.firstOrNull()
   }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
-  private val tetriminoHistory = mutableListOf<Tetrimino>()
+  private val tetriminoHistory = TetriminoHistory()
 
   val board = MutableStateFlow(Board())
   val displayBoard: StateFlow<Board> = combine(board, currentTetrimino, currentPiecePosition) {
-      board: Board, tetrimino: Tetrimino?, position: Tetrimino.Position? ->
-    if (tetrimino == null || position == null) board
-    else board.with(tetrimino, position)
+      board: Board, current: TetriminoHistory.Entry?, position: Tetrimino.Position? ->
+    if (current == null || position == null) board
+    else board.with(current.tetrimino, position)
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), Board())
 
   val nback = GameNbackViewModel(viewModelScope, _gameState, currentTetrimino)
@@ -188,7 +191,7 @@ class GameScreenViewModel(
     val position = currentPiecePosition.value ?: return
 
     val newPosition = position.copy(col = position.col - 1)
-    if (board.value.validPosition(currentTetrimino.value, newPosition)) {
+    if (board.value.validPosition(currentTetrimino.value?.tetrimino, newPosition)) {
       currentPiecePosition.value = newPosition
     }
   }
@@ -198,25 +201,25 @@ class GameScreenViewModel(
     val position = currentPiecePosition.value ?: return
 
     val newPosition = position.copy(col = position.col + 1)
-    if (board.value.validPosition(currentTetrimino.value, newPosition)) {
+    if (board.value.validPosition(currentTetrimino.value?.tetrimino, newPosition)) {
       currentPiecePosition.value = newPosition
     }
   }
 
   fun rotatePiece(direction: Rotation) {
     if (_gameState.value != GameState.Running) return
-    val tetrimino = currentTetrimino.value ?: return
+    val current = currentTetrimino.value ?: return
     val position = currentPiecePosition.value ?: return
 
-    val rotatedPiece = tetrimino.rotate(direction)
+    val rotatedPiece = current.tetrimino.rotate(direction)
     if (board.value.validPosition(rotatedPiece, position)) {
-      currentTetrimino.value = rotatedPiece
+      currentTetrimino.value = TetriminoHistory.Entry(rotatedPiece, current.colorType)
     } else {
       // Try wall kick (adjust position if rotation would cause collision)
       for (offset in listOf(-1, 1, -2, 2)) {
         val newPosition = position.copy(col = position.col + offset)
         if (board.value.validPosition(rotatedPiece, newPosition)) {
-          currentTetrimino.value = rotatedPiece
+          currentTetrimino.value = TetriminoHistory.Entry(rotatedPiece, current.colorType)
           currentPiecePosition.value = newPosition
           break
         }
@@ -241,24 +244,26 @@ class GameScreenViewModel(
     val position = currentPiecePosition.value ?: return false
 
     val newPosition = position.copy(row = position.row + 1)
-    val valid = board.value.validPosition(currentTetrimino.value, newPosition)
+    val valid = board.value.validPosition(currentTetrimino.value?.tetrimino, newPosition)
     if (valid) currentPiecePosition.value = newPosition
 
     return valid
   }
 
-  fun nbackMatchChoice() = nback.matchChoice(tetriminoHistory)
-  fun nbackNoMatchChoice() = nback.noMatchChoice(tetriminoHistory)
+  fun nbackMatchChoice(type: NbackStimulus.Type) = nback.matchChoice(tetriminoHistory.entries, type)
+  fun nbackNoMatchChoice(type: NbackStimulus.Type) = nback.noMatchChoice(tetriminoHistory.entries, type)
 
   private fun lockTetrimino() {
-    val tetrimino = currentTetrimino.value ?: return
+    val current = currentTetrimino.value ?: return
     val position = currentPiecePosition.value ?: return
 
-    if (!nback.matchChoiceMade) nbackNoMatchChoice()
+    gameSettings.nbackSetting.value.forEach {
+      if (nback.currentTetriminoMatchChoicesEntered[it.type] == false) nbackNoMatchChoice(it.type)
+    }
 
     val boardUpdate = mutableMapOf<Int, Map<Int, Int>>()
 
-    tetrimino.shape.forEachIndexed { row, columns ->
+    current.tetrimino.shape.forEachIndexed { row, columns ->
       val rowUpdate = mutableMapOf<Int, Int>()
       boardUpdate[row + position.row] = rowUpdate
 
@@ -267,7 +272,7 @@ class GameScreenViewModel(
       }
     }
 
-    nback.clearMatchChoice()
+    nback.clearMatchChoices()
     board.value = board.value.copy(boardUpdate)
     val completedLines = clearFilledRows()
 
@@ -330,10 +335,10 @@ class GameScreenViewModel(
     currentTetrimino.value = nextTetriminos.value.firstOrNull() ?: throw IllegalStateException()
     nextTetriminos.value = nextTetriminos.value.subList(1, nextTetriminos.value.size)
     if (morePiecesNeeded()) fillNextPieces()
-    currentTetrimino.value?.let { tetriminoHistory.add(it) }
+    currentTetrimino.value?.let { tetriminoHistory.add(it.tetrimino, it.colorType) }
     currentPiecePosition.value = newTetriminoStartPosition
 
-    return board.value.validPosition(currentTetrimino.value, newTetriminoStartPosition)
+    return board.value.validPosition(currentTetrimino.value?.tetrimino, newTetriminoStartPosition)
   }
 
   private fun fillNextPieces() {
@@ -346,7 +351,7 @@ class GameScreenViewModel(
       val lastMatchDistance = lastMatchDistance(nextPieces)
       val matchChance = when (lastMatchDistance) {
         null -> {
-          min(.95f, nbackBaseMatchChance + (sqrt((nextPieces.size + tetriminoHistory.size).toFloat()) * nbackMatchChanceGrowthFactor))
+          min(.95f, nbackBaseMatchChance + (sqrt((nextPieces.size + tetriminoHistory.entries.size).toFloat()) * nbackMatchChanceGrowthFactor))
         }
         0 -> {
           val streakLength = matchStreakLength(nextPieces)
@@ -357,30 +362,34 @@ class GameScreenViewModel(
 
       val nextPiece = if (nbackLevel < nextPieces.size && Random.nextFloat() < matchChance) {
         nextPieces.getOrNull(nextPieces.size - nbackLevel) ?: throw IllegalStateException()
-      } else unpickedNextPieces.random()
+      } else {
+        val nextTetrimino = unpickedNextPieces.random()
+        val nextColor = NbackTetriminoColor.fromIndex(nextTetrimino.type) // TODO: Check for color n-back stimulus and randomize.
+        TetriminoHistory.Entry(nextTetrimino, nextColor)
+      }
 
-      unpickedNextPieces.remove(nextPiece)
+      unpickedNextPieces.remove(nextPiece.tetrimino)
       nextPieces.add(nextPiece)
     }
     nextTetriminos.value = nextPieces
     if (morePiecesNeeded()) fillNextPieces()
   }
 
-  private fun lastMatchDistance(nextPieces: List<Tetrimino>): Int? {
-    val reversed = nextPieces.reversed() + tetriminoHistory.reversed()
+  private fun lastMatchDistance(nextPieces: List<TetriminoHistory.Entry>): Int? {
+    val reversed = nextPieces.reversed() + tetriminoHistory.entries.reversed()
 
     reversed.forEachIndexed { index, tetrimino ->
       val matchPiece = reversed.getOrNull(index + nback.level.value) ?: return null
-      if (matchPiece.type == tetrimino.type) return index
+      if (matchPiece.tetrimino.type == tetrimino.tetrimino.type) return index
     }
     return null
   }
-  private fun matchStreakLength(nextPieces: List<Tetrimino>): Int {
-    val reversed = nextPieces.reversed() + tetriminoHistory.reversed()
+  private fun matchStreakLength(nextPieces: List<TetriminoHistory.Entry>): Int {
+    val reversed = nextPieces.reversed() + tetriminoHistory.entries.reversed()
     var streak = 0
     reversed.forEachIndexed { index, tetrimino ->
       val matchPiece = reversed.getOrNull(index + nback.level.value) ?: return streak
-      if (matchPiece.type == tetrimino.type) streak++
+      if (matchPiece.tetrimino.type == tetrimino.tetrimino.type) streak++
       else return streak
     }
     return streak

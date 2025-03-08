@@ -1,24 +1,68 @@
 package org.eski.menoback.ui.game.model
 
 data class MatchStats(
-    val correctMatches: Int = 0,
-    val correctNonMatches: Int = 0,
-    val incorrectMatches: Int = 0,
-    val missedMatches: Int = 0
+    val correctShapeMatches: Int = 0,
+    val correctShapeNonMatches: Int = 0,
+    val incorrectShapeMatches: Int = 0,
+    val missedShapeMatches: Int = 0,
+
+    val correctColorMatches: Int = 0,
+    val correctColorNonMatches: Int = 0,
+    val incorrectColorMatches: Int = 0,
+    val missedColorMatches: Int = 0
 ) {
-    val totalDecisions: Int = correctMatches + correctNonMatches + incorrectMatches + missedMatches
+    val totalDecisions: Int
+        get() = correctShapeMatches + correctShapeNonMatches +
+            incorrectShapeMatches + missedShapeMatches +
+            correctColorMatches + correctColorNonMatches +
+            incorrectColorMatches + missedColorMatches
 
-    val totalMatchOpportunities: Int = correctMatches + missedMatches
+    val totalShapeDecisions: Int
+        get() = correctShapeMatches + correctShapeNonMatches +
+            incorrectShapeMatches + missedShapeMatches
 
-    val totalNonMatchOpportunities: Int = correctNonMatches + incorrectMatches
+    val totalShapeMatchOpportunities: Int
+        get() = correctShapeMatches + missedShapeMatches
 
-    val accuracyPercentage: Float =
-        if (totalDecisions > 0) ((correctMatches + correctNonMatches).toFloat() / totalDecisions) * 100
+    val shapeAccuracyPercentage: Float
+        get() = if (totalShapeDecisions > 0)
+            ((correctShapeMatches + correctShapeNonMatches).toFloat() / totalShapeDecisions) * 100
         else 0f
 
-    fun formatAccuracy(): String {
-        val accuracy = accuracyPercentage.toString()
+    val totalColorDecisions: Int
+        get() = correctColorMatches + correctColorNonMatches +
+            incorrectColorMatches + missedColorMatches
+
+    val totalColorMatchOpportunities: Int
+        get() = correctColorMatches + missedColorMatches
+
+    val colorAccuracyPercentage: Float
+        get() = if (totalColorDecisions > 0)
+            ((correctColorMatches + correctColorNonMatches).toFloat() / totalColorDecisions) * 100
+        else 0f
+
+    val accuracyPercentage: Float
+        get() = if (totalDecisions > 0)
+            ((correctShapeMatches + correctShapeNonMatches +
+                correctColorMatches + correctColorNonMatches).toFloat() / totalDecisions) * 100
+        else 0f
+
+    val correctMatches: Int
+        get() = correctShapeMatches + correctColorMatches
+    val incorrectMatches: Int
+        get() = incorrectColorMatches + incorrectShapeMatches
+    val missedMatches: Int
+        get() = missedShapeMatches + missedColorMatches
+    val correctNonMatches: Int
+        get() = correctShapeNonMatches + correctColorNonMatches
+
+    fun formatAccuracy(): String = formatPercentage(accuracyPercentage)
+    fun formatShapeAccuracy(): String = formatPercentage(shapeAccuracyPercentage)
+    fun formatColorAccuracy(): String = formatPercentage(colorAccuracyPercentage)
+
+    private fun formatPercentage(floatPercentage: Float): String {
+        val accuracy = floatPercentage.toString()
         return if (!accuracy.contains('.')) "$accuracy%"
-            else "${accuracy.subSequence(0, accuracy.indexOf('.') + 2)}%"
+        else "${accuracy.subSequence(0, accuracy.indexOf('.') + 2)}%"
     }
 }

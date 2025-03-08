@@ -2,6 +2,7 @@ package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -60,6 +61,15 @@ class GameSettings(val settings: Settings) {
   fun setFeedbackMode(feedbackMode: FeedbackMode) {
     this.feedbackMode.value = feedbackMode
     settings.putInt(feedbackModeKey, feedbackMode.stableId)
+  }
+
+  fun toggleNbackStimulus(stimulusType: NbackStimulus.Type) {
+    val enabled = nbackSetting.value.find { it.type == stimulusType } != null
+    if (nbackSetting.value.size == 1 && enabled) return
+
+    val level = nbackSetting.value.first().level
+    nbackSetting.value = nbackSetting.value.toMutableList().apply { add(NbackStimulus(stimulusType, level)) }
+    saveNbackSetting()
   }
 
   fun increaseNbackLevel() {

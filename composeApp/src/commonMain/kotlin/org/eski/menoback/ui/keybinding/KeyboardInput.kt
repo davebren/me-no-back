@@ -22,6 +22,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.delay
+import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
@@ -93,7 +94,7 @@ fun KeyboardInput(
           }
 
           dropPiece -> vm.dropPiece()
-          nbackMatch -> vm.nbackMatchChoice()
+          nbackMatch -> vm.nbackMatchChoice(NbackStimulus.Type.block)
         }
       }
 

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
@@ -111,7 +112,7 @@ fun NBackControls(
       horizontalArrangement = Arrangement.SpaceEvenly
     ) {
       Button(
-        onClick = { vm.nbackMatchChoice() },
+        onClick = { vm.nbackMatchChoice(NbackStimulus.Type.block) },
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
       ) {
         Text("Match")

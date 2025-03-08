@@ -1,5 +1,6 @@
 package org.eski.menoback.ui.game.model
 
+// TODO: Make type an enum
 data class Tetrimino(val type: Int, val shape: Array<IntArray>) {
 
   override fun toString(): String {

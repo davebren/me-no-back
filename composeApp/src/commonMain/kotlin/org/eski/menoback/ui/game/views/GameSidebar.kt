@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.model.Tetrimino
 import org.eski.menoback.ui.TetriminoColors
+import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.utils.grid
 import org.eski.menoback.ui.utils.grid2
@@ -62,7 +63,7 @@ fun NextPiecePreview(
   modifier: Modifier = Modifier
 ) {
   val tetriminoColors: TetriminoColors by vm.tetriminoColors.collectAsState()
-  val nextTetrimino: Tetrimino? by vm.nextTetrimino.collectAsState()
+  val nextTetrimino: TetriminoHistory.Entry? by vm.nextTetrimino.collectAsState()
 
   Column(
     modifier = modifier,
@@ -85,7 +86,8 @@ fun NextPiecePreview(
         .padding(grid),
       contentAlignment = Alignment.Center
     ) {
-      val tetrimino = nextTetrimino ?: return@Box
+      val tetrimino = nextTetrimino?.tetrimino ?: return@Box
+      val color = nextTetrimino?.colorType?.colorIndex?.let { tetriminoColors.fromInt(it) } ?: return@Box // TODO: Handle in VM
       val pieceRows = tetrimino.shape.size
       val pieceCols = tetrimino.shape[0].size
 
@@ -99,7 +101,7 @@ fun NextPiecePreview(
                 modifier = Modifier
                   .size(20.dp)
                   .padding(1.dp)
-                  .background(tetriminoColors.fromInt(tetrimino.shape[row][col]) ?: Color.Transparent)
+                  .background(if (tetrimino.shape[row][col] != 0) color else Color.Transparent)
               )
             }
           }
