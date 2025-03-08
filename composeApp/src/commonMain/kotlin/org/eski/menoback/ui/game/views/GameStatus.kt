@@ -48,6 +48,9 @@ fun GameStatus(
       NBackLevelSelector(vm)
 
       Spacer(modifier = Modifier.height(16.dp))
+      ColorNbackToggle(vm)
+
+      Spacer(modifier = Modifier.height(16.dp))
     }
 
     Text(

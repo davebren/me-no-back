@@ -2,10 +2,6 @@ package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.model.GameDuration
 import org.eski.menoback.ui.game.model.NbackStimulus
@@ -64,11 +60,17 @@ class GameSettings(val settings: Settings) {
   }
 
   fun toggleNbackStimulus(stimulusType: NbackStimulus.Type) {
-    val enabled = nbackSetting.value.find { it.type == stimulusType } != null
+    val oldSetting = nbackSetting.value
+    val enabled = oldSetting.find { it.type == stimulusType } != null
     if (nbackSetting.value.size == 1 && enabled) return
 
-    val level = nbackSetting.value.first().level
-    nbackSetting.value = nbackSetting.value.toMutableList().apply { add(NbackStimulus(stimulusType, level)) }
+    val level = oldSetting.first().level
+
+    if (oldSetting.find { it.type == stimulusType } != null) {
+      nbackSetting.value = oldSetting.filterNot { it.type == stimulusType }
+    } else {
+      nbackSetting.value = oldSetting.toMutableList().apply { add(NbackStimulus(stimulusType, level)) }
+    }
     saveNbackSetting()
   }
 

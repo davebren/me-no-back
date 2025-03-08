@@ -25,6 +25,11 @@ class GameNbackViewModel(
   val level: StateFlow<Int> = setting.map { it.first().level }
     .stateIn(scope, SharingStarted.WhileSubscribed(), 2)
 
+  val colorNbackEnabled: StateFlow<Boolean> = setting.map {
+    it.find { stimulus -> stimulus.type == NbackStimulus.Type.color } != null
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+
   val streak = MutableStateFlow(0)
   val matchStats = MutableStateFlow(MatchStats())
 
@@ -130,6 +135,8 @@ class GameNbackViewModel(
   fun clearMatchChoices() {
     currentTetriminoMatchChoicesEntered.putAll(currentTetriminoMatchChoicesEntered.mapValues { false  })
   }
+
+  fun colorNbackToggled() = gameSettings.toggleNbackStimulus(NbackStimulus.Type.color)
 
   private fun updateMultiplier(correct: Boolean) {
     return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
