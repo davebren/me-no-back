@@ -2,7 +2,7 @@ package org.eski.menoback.ui.game.views
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Switch
@@ -32,7 +32,7 @@ fun ColorNbackToggle(
 
   Row(
     verticalAlignment = Alignment.CenterVertically,
-    modifier = modifier
+    modifier = modifier.fillMaxWidth()
   ) {
     Icon(
       imageVector = Icons.Default.ColorLens,
@@ -43,12 +43,11 @@ fun ColorNbackToggle(
     Spacer(modifier = Modifier.width(8.dp))
 
     Text(
-      text = "Color Match Mode",
+      text = "Color Match",
       color = if (enabled) Color.Cyan else Color.Gray,
-      fontSize = 14.sp
+      fontSize = 14.sp,
+      modifier = Modifier.weight(1f)
     )
-
-    Spacer(modifier = Modifier.width(8.dp))
 
     Switch(
       checked = enabled,

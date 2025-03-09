@@ -53,7 +53,7 @@ class GameScreenViewModel(
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
   val showGameControls: StateFlow<Boolean> = combine(gameSettings.showGameControls, _gameState) {
-    showSetting, gameState -> 
+    showSetting, gameState ->
     gameState == GameState.Running && showSetting
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 

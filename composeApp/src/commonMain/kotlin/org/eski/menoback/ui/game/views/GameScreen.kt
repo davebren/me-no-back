@@ -84,8 +84,6 @@ fun GameScreen(
                 Spacer(modifier = Modifier.width(16.dp))
                 GameSidebar(vm)
             }
-
-            GameStatus(vm, gameState = gameState, onResetClicked = { vm.quitGame() })
         }
 
         GameQuitButton(visible = gameState == GameState.Paused, containerSize = size, onExpanded = { vm.quitGame() })

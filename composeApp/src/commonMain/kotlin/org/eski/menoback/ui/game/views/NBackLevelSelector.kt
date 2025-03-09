@@ -2,11 +2,11 @@ package org.eski.menoback.ui.game.views
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,29 +27,38 @@ fun NBackLevelSelector(
   val nbackLevel by vm.nback.level.collectAsState()
 
   Column(
-    modifier = modifier,
+    modifier = modifier.fillMaxWidth(),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Text(
       text = "n-Back Level",
-      fontSize = 16.sp,
-      fontWeight = FontWeight.Bold,
+      fontSize = 15.sp,
+      fontWeight = FontWeight.Medium,
       color = Color.LightGray
     )
 
     Spacer(modifier = Modifier.height(8.dp))
 
     Row(
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center,
+      modifier = Modifier.fillMaxWidth()
     ) {
       Button(
         onClick = { vm.nback.decreaseLevel() },
-        modifier = Modifier.size(40.dp)
+        modifier = Modifier.size(40.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = Color(0xFF444444)
+        )
       ) {
-        Icon(Icons.Default.Remove, contentDescription = "Decrease N-Back Level")
+        Icon(
+          Icons.Default.Remove,
+          contentDescription = "Decrease N-Back Level",
+          tint = Color.White
+        )
       }
 
-      Spacer(modifier = Modifier.width(8.dp))
+      Spacer(modifier = Modifier.width(16.dp))
 
       Text(
         text = nbackLevel.toString(),
@@ -58,13 +67,20 @@ fun NBackLevelSelector(
         color = Color.White
       )
 
-      Spacer(modifier = Modifier.width(8.dp))
+      Spacer(modifier = Modifier.width(16.dp))
 
       Button(
         onClick = { vm.nback.increaseLevel() },
-        modifier = Modifier.size(40.dp)
+        modifier = Modifier.size(40.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = Color(0xFF444444)
+        )
       ) {
-        Icon(Icons.Default.Add, contentDescription = "Increase N-Back Level")
+        Icon(
+          Icons.Default.Add,
+          contentDescription = "Increase N-Back Level",
+          tint = Color.White
+        )
       }
     }
   }

@@ -26,12 +26,14 @@ import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.TetriminoColors
 import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
+import org.eski.menoback.ui.game.vm.GameState
 import org.eski.ui.util.grid
 import org.eski.ui.util.grid2
 
 @Composable
 fun RowScope.GameSidebar(vm: GameScreenViewModel) {
   val showGameControls by vm.showGameControls.collectAsState()
+  val gameState by vm.gameState.collectAsState()
 
   Column(
     modifier = Modifier.weight(0.3f),
@@ -40,7 +42,40 @@ fun RowScope.GameSidebar(vm: GameScreenViewModel) {
   ) {
     NextPiecePreview(vm, modifier = Modifier.size(120.dp))
     Spacer(modifier = Modifier.height(grid2))
+
+    // Add N-Back Level and Color Mode settings when game is not running
+    if (gameState == GameState.NotStarted || gameState == GameState.GameOver) {
+      NBackSettingsPanel(vm)
+      Spacer(modifier = Modifier.height(grid2))
+    }
+
     if (showGameControls) CollapsibleGameControls(vm)
+  }
+}
+
+@Composable
+fun NBackSettingsPanel(vm: GameScreenViewModel) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = Modifier
+      .border(1.dp, Color.DarkGray, RoundedCornerShape(8.dp))
+      .background(Color(0xFF3A3A3A), RoundedCornerShape(8.dp))
+      .padding(12.dp)
+  ) {
+    Text(
+      text = "N-Back Settings",
+      fontSize = 16.sp,
+      fontWeight = FontWeight.Bold,
+      color = Color.White
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    NBackLevelSelector(vm)
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    ColorNbackToggle(vm)
   }
 }
 
