@@ -29,17 +29,15 @@ import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
-
 @Composable
 fun GameControls(
   vm: GameScreenViewModel,
+  modifier: Modifier = Modifier
 ) {
   Column(
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier
   ) {
-    // N-Back controls
-    NBackControls(vm)
-
     // Rotate button
     Button(
       onClick = { vm.rotatePiece(Rotation.clockwise) },
@@ -92,11 +90,13 @@ fun GameControls(
 @Composable
 fun NBackControls(
   vm: GameScreenViewModel,
+  modifier: Modifier = Modifier
 ) {
   val level by vm.nback.level.collectAsState()
 
   Column(
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier
   ) {
     Text(
       text = "$level-Back Match?",

@@ -29,7 +29,6 @@ import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.ui.util.grid
 import org.eski.ui.util.grid2
 
-
 @Composable
 fun RowScope.GameSidebar(vm: GameScreenViewModel) {
   Column(
@@ -47,12 +46,10 @@ fun RowScope.GameSidebar(vm: GameScreenViewModel) {
 
     Spacer(modifier = Modifier.height(grid2))
 
-
-
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Game controls
-    GameControls(vm)
+    // Game controls in a collapsible card
+    CollapsibleGameControls(vm)
   }
 }
 
@@ -109,4 +106,3 @@ fun NextPiecePreview(
     }
   }
 }
-
