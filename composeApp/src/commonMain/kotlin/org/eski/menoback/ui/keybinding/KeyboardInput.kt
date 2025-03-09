@@ -99,7 +99,7 @@ fun KeyboardInput(
           }
 
           dropPiece -> vm.dropPiece()
-          nbackShapeMatch -> vm.nbackMatchChoice(NbackStimulus.Type.block)
+          nbackShapeMatch -> vm.nbackMatchChoice(NbackStimulus.Type.shape)
           nbackColorMatch -> if (colorNbackEnabled) vm.nbackMatchChoice(NbackStimulus.Type.color)
         }
       }

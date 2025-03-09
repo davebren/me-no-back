@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class NbackStimulus(val type: Type, val level: Int) {
   @Serializable
   enum class Type {
-    block, color
+    shape, color
   }
 
   override fun toString() = "${type.name}:$level"

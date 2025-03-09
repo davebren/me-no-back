@@ -25,6 +25,10 @@ class GameNbackViewModel(
   val level: StateFlow<Int> = setting.map { it.first().level }
     .stateIn(scope, SharingStarted.WhileSubscribed(), 2)
 
+  val shapeNbackEnable: StateFlow<Boolean> = setting.map {
+    it.find { stimulus -> stimulus.type == NbackStimulus.Type.shape} != null
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
   val colorNbackEnabled: StateFlow<Boolean> = setting.map {
     it.find { stimulus -> stimulus.type == NbackStimulus.Type.color } != null
   }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
@@ -57,12 +61,11 @@ class GameNbackViewModel(
       return
     }
     currentTetriminoMatchChoicesEntered[type] = true
-    println("matchChoice: ${type.name}")
 
     val correct = if (tetriminoHistory.size > setting.value.first().level) {
       val nBackPiece = tetriminoHistory[tetriminoHistory.size - setting.value.first().level - 1]
       when(type) {
-        NbackStimulus.Type.block -> currentTetrimino.value?.tetrimino?.type == nBackPiece.tetrimino.type
+        NbackStimulus.Type.shape -> currentTetrimino.value?.tetrimino?.type == nBackPiece.tetrimino.type
         NbackStimulus.Type.color -> currentTetrimino.value?.colorType == nBackPiece.colorType
       }
     } else false
@@ -70,7 +73,7 @@ class GameNbackViewModel(
     val oldStats = matchStats.value
 
     matchStats.value = when(type) {
-      NbackStimulus.Type.block -> oldStats.copy(
+      NbackStimulus.Type.shape -> oldStats.copy(
         correctShapeMatches = oldStats.correctShapeMatches + if (correct) 1 else 0,
         incorrectShapeMatches = oldStats.incorrectShapeMatches + if (!correct) 1 else 0
       )
@@ -100,7 +103,7 @@ class GameNbackViewModel(
     val correct = if (tetriminoHistory.size > setting.value.first().level) {
       val nBackPiece = tetriminoHistory[tetriminoHistory.size - setting.value.first().level - 1]
       when(type) {
-        NbackStimulus.Type.block -> currentTetrimino.value?.tetrimino?.type != nBackPiece.tetrimino.type
+        NbackStimulus.Type.shape -> currentTetrimino.value?.tetrimino?.type != nBackPiece.tetrimino.type
         NbackStimulus.Type.color -> currentTetrimino.value?.colorType != nBackPiece.colorType
       }
     } else true
@@ -108,7 +111,7 @@ class GameNbackViewModel(
     val oldStats = matchStats.value
 
     matchStats.value = when(type) {
-      NbackStimulus.Type.block -> oldStats.copy(
+      NbackStimulus.Type.shape -> oldStats.copy(
         correctShapeNonMatches = oldStats.correctShapeNonMatches + if (correct) 1 else 0,
         missedShapeMatches = oldStats.missedShapeMatches + if (!correct) 1 else 0
       )

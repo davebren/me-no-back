@@ -93,6 +93,8 @@ fun NBackControls(
   modifier: Modifier = Modifier
 ) {
   val level by vm.nback.level.collectAsState()
+  val shapeButtonVisible by vm.nback.shapeNbackEnable.collectAsState()
+  val colorButtonVisible by vm.nback.colorNbackEnabled.collectAsState()
 
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -111,11 +113,22 @@ fun NBackControls(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-      Button(
-        onClick = { vm.nbackMatchChoice(NbackStimulus.Type.block) },
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
-      ) {
-        Text("Match")
+      if (shapeButtonVisible) {
+        Button(
+          onClick = { vm.nbackMatchChoice(NbackStimulus.Type.shape) },
+          colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
+        ) {
+          Text("Shape")
+        }
+      }
+
+      if (colorButtonVisible) {
+        Button(
+          onClick = { vm.nbackMatchChoice(NbackStimulus.Type.color) },
+          colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
+        ) {
+          Text("Color")
+        }
       }
     }
   }
