@@ -31,25 +31,16 @@ import org.eski.ui.util.grid2
 
 @Composable
 fun RowScope.GameSidebar(vm: GameScreenViewModel) {
+  val showGameControls by vm.showGameControls.collectAsState()
+
   Column(
     modifier = Modifier.weight(0.3f),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.SpaceBetween
   ) {
-    // Next piece preview
-    NextPiecePreview(
-      vm,
-      modifier = Modifier
-        .width(120.dp)
-        .height(120.dp)
-    )
-
+    NextPiecePreview(vm, modifier = Modifier.size(120.dp))
     Spacer(modifier = Modifier.height(grid2))
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Game controls in a collapsible card
-    CollapsibleGameControls(vm)
+    if (showGameControls) CollapsibleGameControls(vm)
   }
 }
 

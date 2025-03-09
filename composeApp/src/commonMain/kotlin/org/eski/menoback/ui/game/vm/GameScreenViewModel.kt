@@ -52,6 +52,11 @@ class GameScreenViewModel(
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
+  val showGameControls: StateFlow<Boolean> = combine(gameSettings.showGameControls, _gameState) {
+    showSetting, gameState -> 
+    gameState == GameState.Running && showSetting
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
   val startButtonClickable = gameState.map {
     it == GameState.GameOver || it == GameState.NotStarted || it == GameState.Paused
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)

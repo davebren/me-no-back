@@ -17,11 +17,13 @@ class GameSettings(val settings: Settings) {
     private const val gameDurationKey = "$settingsKey.duration"
     private const val feedbackModeKey = "$settingsKey.feedbackMode"
     private const val nbackSettingKey = "$settingsKey.nback"
+    private const val showGameControlsKey = "$settingsKey.showGameControls"
   }
 
   val gameDuration = MutableStateFlow(settings.getInt(gameDurationKey, GameDuration.default.durationSeconds))
   val feedbackMode = MutableStateFlow(enumFromStableId<FeedbackMode>(settings.getInt(feedbackModeKey, FeedbackMode.default.stableId)))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.block, 2)))
+  val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
 
   init {
     val nbackSettingsJson = settings.getStringOrNull(nbackSettingKey)
@@ -35,17 +37,19 @@ class GameSettings(val settings: Settings) {
     gameDuration.value = durationSeconds
     settings.putInt(gameDurationKey, durationSeconds)
   }
+
   fun increaseGameDuration() {
     val currentDuration = gameDuration.value
     val nextDuration = GameDuration.entries.find { it.durationSeconds > currentDuration }?.durationSeconds ?: currentDuration
     setGameDuration(nextDuration)
   }
+
   fun decreaseGameDuration() {
     val currentDuration = gameDuration.value
     val nextDuration = GameDuration.entries.reversed().find { it.durationSeconds < currentDuration }?.durationSeconds ?: currentDuration
     setGameDuration(nextDuration)
   }
-  // TODO: Move to viewmodel.
+
   fun formatDuration(durationSeconds: Int): String {
     return when {
       durationSeconds <= 60 -> "${durationSeconds}s"
@@ -82,6 +86,11 @@ class GameSettings(val settings: Settings) {
   fun decreaseNbackLevel() {
     nbackSetting.value = nbackSetting.value.map { it.copy(level = max(1, it.level - 1)) }
     saveNbackSetting()
+  }
+
+  fun setShowGameControls(show: Boolean) {
+    showGameControls.value = show
+    settings.putBoolean(showGameControlsKey, show)
   }
 
   private fun saveNbackSetting() {

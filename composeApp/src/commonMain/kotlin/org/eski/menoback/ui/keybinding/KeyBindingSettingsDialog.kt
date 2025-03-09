@@ -72,8 +72,9 @@ private fun KeyBindingSettingsDialogContent(
   val startGame by keyBindingSettings.startGame.collectAsState()
   val pauseGame by keyBindingSettings.pauseGame.collectAsState()
 
-  // Get current feedback mode
+  // Get current feedback mode and game controls visibility
   val feedbackMode by gameSettings.feedbackMode.collectAsState()
+  val showGameControls by gameSettings.showGameControls.collectAsState()
 
   var selectedBinding by remember { mutableStateOf<String?>(null) }
   val focusRequester = remember { FocusRequester() }
@@ -133,7 +134,7 @@ private fun KeyBindingSettingsDialogContent(
           .verticalScroll(scrollState)
       ) {
         // Feedback Mode Section
-        SectionHeader(text = "Game Feedback")
+        SectionHeader(text = "Game Display")
 
         Text(
           text = "Visual Feedback Mode",
@@ -160,6 +161,35 @@ private fun KeyBindingSettingsDialogContent(
             text = "Flash Background",
             isSelected = feedbackMode == FeedbackMode.flashBackground,
             onClick = { gameSettings.setFeedbackMode(FeedbackMode.flashBackground) }
+          )
+        }
+
+        // Game Controls Visibility Option
+        Text(
+          text = "On-Screen Game Controls",
+          color = Color.White,
+          fontSize = 15.sp,
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+        )
+
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          FeedbackOptionButton(
+            text = "Show",
+            isSelected = showGameControls,
+            onClick = { gameSettings.setShowGameControls(true) }
+          )
+
+          FeedbackOptionButton(
+            text = "Hide",
+            isSelected = !showGameControls,
+            onClick = { gameSettings.setShowGameControls(false) }
           )
         }
 
