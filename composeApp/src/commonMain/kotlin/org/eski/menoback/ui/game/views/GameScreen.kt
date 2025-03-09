@@ -6,6 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.eski.menoback.data.keyBindingSettings
 import org.eski.menoback.data.gameStatsData
+import org.eski.menoback.data.introSettings
+import org.eski.menoback.ui.game.GameIntroDialog
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.keybinding.KeyBindingSettings
 import org.eski.menoback.ui.keybinding.KeyBindingSettingsDialog
@@ -40,7 +43,19 @@ fun GameScreen(
     val gameState by vm.gameState.collectAsState()
     val feedbackMode by vm.feedbackMode.collectAsState()
     var showKeyBindingDialog by remember { mutableStateOf(false) }
+    var showIntroDialog by remember { mutableStateOf(false) }
     var size by remember { mutableStateOf(IntSize(0, 0)) }
+
+    // Check if the intro has been shown before
+    val introShown by introSettings.introShown.collectAsState()
+
+    // Show intro dialog on first launch
+    LaunchedEffect(Unit) {
+        if (!introShown) {
+            showIntroDialog = true
+            introSettings.setIntroShown(true)
+        }
+    }
 
     KeyboardInput(vm, keyBindings)
 
@@ -53,8 +68,32 @@ fun GameScreen(
             .background(color = Color.DarkGray)
             .onSizeChanged { size = it }
     ) {
+        // Info button on top left
         IconButton(
-            modifier = Modifier.align(alignment = Alignment.TopEnd).size(grid6).padding(gridHalf),
+            modifier = Modifier
+                .align(alignment = Alignment.TopStart)
+                .size(grid6)
+                .padding(gridHalf),
+            onClick = {
+                if (gameState == GameState.Running) {
+                    vm.pauseBindingInvoked()
+                }
+                showIntroDialog = true
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Game Information",
+                tint = Color.White,
+            )
+        }
+
+        // Settings button on top right
+        IconButton(
+            modifier = Modifier
+                .align(alignment = Alignment.TopEnd)
+                .size(grid6)
+                .padding(gridHalf),
             onClick = {
                 vm.pauseBindingInvoked()
                 showKeyBindingDialog = true
@@ -95,6 +134,22 @@ fun GameScreen(
             keyBindingSettings = keyBindings,
             gameSettings = gameSettings,
             onDismiss = { showKeyBindingDialog = false }
+        )
+    }
+
+    if (showIntroDialog) {
+        GameIntroDialog(
+            isFirstLaunch = !introShown,
+            onDismiss = {
+                showIntroDialog = false
+                if (gameState == GameState.Paused) {
+                    vm.resumeGame()
+                }
+            },
+            onOpenSettings = {
+                showIntroDialog = false
+                showKeyBindingDialog = true
+            }
         )
     }
 }
