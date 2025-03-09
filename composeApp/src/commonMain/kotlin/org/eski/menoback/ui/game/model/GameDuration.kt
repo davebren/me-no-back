@@ -6,7 +6,7 @@ enum class GameDuration(
   override val stableId: Int,
   val durationSeconds: Int,
 ): SettingsEnum {
-  thirtySeconds(0, 30),
+//  thirtySeconds(0, 30),
   oneMinute(1, 60),
   twoMinutes(2, 120),
   fiveMinutes(3, 300),
