@@ -191,10 +191,11 @@ class GameScreenViewModel(
     if (currentScore > currentHighScore.value) gameStatsData.putHighScore(currentScore, gameDuration, nBack)
     gameSettings.gameDuration.value = gameDuration.toInt() // TODO: Find a better way to update the current high score.
 
+    val newLevelUnlocked = nback.checkLevelProgression()
+
     _gameState.value = GameState.GameOver
     gameJob?.cancel()
   }
-
   fun leftClicked() {
     if (_gameState.value != GameState.Running) return
     val position = currentPiecePosition.value ?: return

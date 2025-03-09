@@ -2,6 +2,7 @@ package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.model.GameDuration
 import org.eski.menoback.ui.game.model.NbackStimulus
@@ -11,7 +12,7 @@ import org.eski.util.safeJsonEncode
 import kotlin.math.max
 import kotlin.math.min
 
-class GameSettings(val settings: Settings) {
+class GameSettings(val settings: Settings, val nbackProgress: NbackProgressData) {
   companion object {
     private const val settingsKey = "settings.game"
     private const val gameDurationKey = "$settingsKey.duration"
@@ -24,6 +25,9 @@ class GameSettings(val settings: Settings) {
   val feedbackMode = MutableStateFlow(enumFromStableId<FeedbackMode>(settings.getInt(feedbackModeKey, FeedbackMode.default.stableId)))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.shape, 2)))
   val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
+
+  private val _currentMaxLevel = MutableStateFlow(2)
+  val currentMaxLevel = _currentMaxLevel.asStateFlow()
 
   init {
     val nbackSettingsJson = settings.getStringOrNull(nbackSettingKey)
@@ -95,5 +99,32 @@ class GameSettings(val settings: Settings) {
 
   private fun saveNbackSetting() {
     nbackSetting.value.safeJsonEncode()?.let { settings.putString(nbackSettingKey, it) }
+  }
+
+
+  fun isCurrentLevelMaxUnlocked(): Boolean {
+    return nbackSetting.value.first().level >= currentMaxLevel.value
+  }
+
+  /**
+   * Updates the max level allowed based on current game settings
+   */
+  private fun updateCurrentMaxLevel() {
+    _currentMaxLevel.value = nbackProgress.getMaxUnlockedLevel(
+      gameDuration.value,
+      nbackSetting.value
+    )
+  }
+
+  fun updateNbackProgress(accuracy: Float): Boolean {
+    val level = nbackSetting.value.first().level
+    val duration = gameDuration.value
+    val stimuli = nbackSetting.value
+
+    val newLevelUnlocked = nbackProgress.updateProgress(level, accuracy, duration, stimuli)
+    if (newLevelUnlocked) {
+      updateCurrentMaxLevel()
+    }
+    return newLevelUnlocked
   }
 }

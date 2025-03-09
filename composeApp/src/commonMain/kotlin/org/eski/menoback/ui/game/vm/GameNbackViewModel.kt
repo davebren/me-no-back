@@ -25,6 +25,10 @@ class GameNbackViewModel(
   val level: StateFlow<Int> = setting.map { it.first().level }
     .stateIn(scope, SharingStarted.WhileSubscribed(), 2)
 
+  // Add the max level from the game settings
+  val maxLevel: StateFlow<Int> = gameSettings.currentMaxLevel
+    .stateIn(scope, SharingStarted.WhileSubscribed(), 2)
+
   val shapeNbackEnable: StateFlow<Boolean> = setting.map {
     it.find { stimulus -> stimulus.type == NbackStimulus.Type.shape} != null
   }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
@@ -46,13 +50,28 @@ class GameNbackViewModel(
     else "${it.toString().subSequence(0, it.toString().indexOf('.') + 2)}x"
   }.stateIn(scope, SharingStarted.WhileSubscribed(), "1.0x")
 
-  fun increaseLevel() { gameSettings.increaseNbackLevel() }
+  fun increaseLevel() {
+    // Only allow increase if current level is below max unlocked level
+    if (level.value < maxLevel.value) {
+      gameSettings.increaseNbackLevel()
+    }
+  }
+
   fun decreaseLevel() { gameSettings.decreaseNbackLevel() }
 
   fun reset() {
     matchStats.value = MatchStats()
     streak.value = 0
     multiplier.value = 1f
+  }
+
+  /**
+   * Called at the end of a game to check if progression was achieved
+   * Returns true if a new level was unlocked
+   */
+  fun checkLevelProgression(): Boolean {
+    val accuracy = matchStats.value.accuracyPercentage
+    return gameSettings.updateNbackProgress(accuracy)
   }
 
   fun matchChoice(tetriminoHistory: List<TetriminoHistory.Entry>, type: NbackStimulus.Type) {
@@ -79,7 +98,7 @@ class GameNbackViewModel(
       )
       NbackStimulus.Type.color -> oldStats.copy(
         correctColorMatches = oldStats.correctColorMatches + if (correct) 1 else 0,
-        incorrectColorMatches = oldStats.incorrectColorMatches + if (correct) 1 else 0
+        incorrectColorMatches = oldStats.incorrectColorMatches + if (!correct) 1 else 0
       )
     }
 
@@ -117,7 +136,7 @@ class GameNbackViewModel(
       )
       NbackStimulus.Type.color -> oldStats.copy(
         correctColorNonMatches = oldStats.correctColorNonMatches + if (correct) 1 else 0,
-        missedShapeMatches = oldStats.missedColorMatches + if (!correct) 1 else 0
+        missedColorMatches = oldStats.missedColorMatches + if (!correct) 1 else 0
       )
     }
 
@@ -141,7 +160,7 @@ class GameNbackViewModel(
 
   private fun updateMultiplier(correct: Boolean) {
     return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
-      else multiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
+    else multiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
   }
 
   enum class FeedbackState {
