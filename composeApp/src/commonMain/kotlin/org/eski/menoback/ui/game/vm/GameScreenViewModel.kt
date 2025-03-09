@@ -130,6 +130,7 @@ class GameScreenViewModel(
       spawnNewPiece()
       startGameLoop()
       startTimer()
+      nback.onGameStarted()
     }
   }
 

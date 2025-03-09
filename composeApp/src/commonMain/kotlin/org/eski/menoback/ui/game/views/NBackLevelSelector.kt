@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.eski.menoback.ui.game.data.NbackProgressData
+import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
 
@@ -30,7 +30,7 @@ fun NBackLevelSelector(
   val nbackLevel by vm.nback.level.collectAsState()
   val maxLevel by vm.nback.maxLevel.collectAsState()
   val gameState by vm.gameState.collectAsState()
-  val isAtMaxLevel = nbackLevel >= maxLevel
+  val maxLevelText by vm.nback.maxLevelText.collectAsState()
 
   Column(
     modifier = modifier.fillMaxWidth(),
@@ -46,7 +46,7 @@ fun NBackLevelSelector(
         color = Color.LightGray
       )
 
-      if (isAtMaxLevel && gameState == GameState.NotStarted) {
+      if (maxLevel == nbackLevel && gameState == GameState.NotStarted) {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
           text = "(Max)",
@@ -112,10 +112,10 @@ fun NBackLevelSelector(
       }
     }
 
-    if (isAtMaxLevel && gameState == GameState.NotStarted) {
+    if (maxLevel == nbackLevel && gameState == GameState.NotStarted) {
       Spacer(modifier = Modifier.height(8.dp))
       Text(
-        text = "Play at this level with ${NbackProgressData.accuracyThreshold}%+ accuracy to unlock the next level",
+        text = maxLevelText,
         fontSize = 12.sp,
         color = Color.LightGray,
         modifier = Modifier.padding(horizontal = 8.dp)

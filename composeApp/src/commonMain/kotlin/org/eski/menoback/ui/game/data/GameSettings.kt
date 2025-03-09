@@ -1,18 +1,29 @@
 package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.model.GameDuration
 import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.util.enumFromStableId
+import org.eski.util.equalsIgnoreOrder
 import org.eski.util.safeJsonDecode
 import org.eski.util.safeJsonEncode
 import kotlin.math.max
 import kotlin.math.min
 
-class GameSettings(val settings: Settings, val nbackProgress: NbackProgressData) {
+class GameSettings(val settings: Settings, val statsData: GameStatsData) {
+  val scope = MainScope()
+
   companion object {
     private const val settingsKey = "settings.game"
     private const val gameDurationKey = "$settingsKey.duration"
@@ -22,12 +33,22 @@ class GameSettings(val settings: Settings, val nbackProgress: NbackProgressData)
   }
 
   val gameDuration = MutableStateFlow(settings.getInt(gameDurationKey, GameDuration.default.durationSeconds))
+  val gameDurationFormatted: StateFlow<String> = gameDuration.map {
+    formatDuration(it)
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
+
   val feedbackMode = MutableStateFlow(enumFromStableId<FeedbackMode>(settings.getInt(feedbackModeKey, FeedbackMode.default.stableId)))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.shape, 2)))
   val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
 
-  private val _currentMaxLevel = MutableStateFlow(2)
-  val currentMaxLevel = _currentMaxLevel.asStateFlow()
+  val currentMaxLevel: StateFlow<Int> = combine(gameDuration, nbackSetting, statsData.lastUnlockedLevelUpdate) {
+    duration, nback, lastUnlockUpdate ->
+    if (lastUnlockUpdate?.durationSeconds == duration && lastUnlockUpdate.nback.equalsIgnoreOrder(nback.map { it.type })) {
+      lastUnlockUpdate.level
+    } else {
+      statsData.unlockedLevel(duration, nback)
+    }
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), GameStatsData.defaultLevelUnlocked)
 
   init {
     val nbackSettingsJson = settings.getStringOrNull(nbackSettingKey)
@@ -92,6 +113,11 @@ class GameSettings(val settings: Settings, val nbackProgress: NbackProgressData)
     saveNbackSetting()
   }
 
+  fun setNbackLevel(level: Int) {
+    nbackSetting.value = nbackSetting.value.map { it.copy(level = min(15, max(1, level))) }
+    saveNbackSetting()
+  }
+
   fun setShowGameControls(show: Boolean) {
     showGameControls.value = show
     settings.putBoolean(showGameControlsKey, show)
@@ -99,32 +125,5 @@ class GameSettings(val settings: Settings, val nbackProgress: NbackProgressData)
 
   private fun saveNbackSetting() {
     nbackSetting.value.safeJsonEncode()?.let { settings.putString(nbackSettingKey, it) }
-  }
-
-
-  fun isCurrentLevelMaxUnlocked(): Boolean {
-    return nbackSetting.value.first().level >= currentMaxLevel.value
-  }
-
-  /**
-   * Updates the max level allowed based on current game settings
-   */
-  private fun updateCurrentMaxLevel() {
-    _currentMaxLevel.value = nbackProgress.getMaxUnlockedLevel(
-      gameDuration.value,
-      nbackSetting.value
-    )
-  }
-
-  fun updateNbackProgress(accuracy: Float): Boolean {
-    val level = nbackSetting.value.first().level
-    val duration = gameDuration.value
-    val stimuli = nbackSetting.value
-
-    val newLevelUnlocked = nbackProgress.updateProgress(level, accuracy, duration, stimuli)
-    if (newLevelUnlocked) {
-      updateCurrentMaxLevel()
-    }
-    return newLevelUnlocked
   }
 }

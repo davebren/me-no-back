@@ -5,10 +5,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.eski.menoback.data.gameSettings
+import org.eski.menoback.data.gameStatsData
+import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.MatchStats
 import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.TetriminoHistory
@@ -37,7 +40,6 @@ class GameNbackViewModel(
     it.find { stimulus -> stimulus.type == NbackStimulus.Type.color } != null
   }.stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-
   val streak = MutableStateFlow(0)
   val matchStats = MutableStateFlow(MatchStats())
 
@@ -50,6 +52,20 @@ class GameNbackViewModel(
     else "${it.toString().subSequence(0, it.toString().indexOf('.') + 2)}x"
   }.stateIn(scope, SharingStarted.WhileSubscribed(), "1.0x")
 
+  val showLevelUnlocked = MutableStateFlow<Boolean>(false)
+
+  val maxLevelText: StateFlow<String> = gameSettings.gameDurationFormatted.map { duration ->
+    "Play at this level for ${duration} with ${GameStatsData.accuracyThreshold}%+ accuracy to unlock the next level."
+ }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
+
+  init {
+    scope.launch {
+      gameSettings.currentMaxLevel.collectLatest { maxLevel ->
+        if (level.value > maxLevel) setLevel(maxLevel)
+      }
+    }
+  }
+
   fun increaseLevel() {
     // Only allow increase if current level is below max unlocked level
     if (level.value < maxLevel.value) {
@@ -58,6 +74,8 @@ class GameNbackViewModel(
   }
 
   fun decreaseLevel() { gameSettings.decreaseNbackLevel() }
+
+  private fun setLevel(level: Int) { gameSettings.setNbackLevel(level) }
 
   fun reset() {
     matchStats.value = MatchStats()
@@ -71,7 +89,16 @@ class GameNbackViewModel(
    */
   fun checkLevelProgression(): Boolean {
     val accuracy = matchStats.value.accuracyPercentage
-    return gameSettings.updateNbackProgress(accuracy)
+    if (accuracy >= GameStatsData.accuracyThreshold) {
+      val currentMaxLevel = gameStatsData.unlockedLevel(gameSettings.gameDuration.value, setting.value)
+      if (currentMaxLevel == level.value && level.value < 15) {
+        gameStatsData.putUnlockedLevel(currentMaxLevel + 1, gameSettings.gameDuration.value, setting.value)
+        showLevelUnlocked.value = true
+        return true
+      }
+    }
+    showLevelUnlocked.value = false
+    return false
   }
 
   fun matchChoice(tetriminoHistory: List<TetriminoHistory.Entry>, type: NbackStimulus.Type) {
@@ -161,6 +188,10 @@ class GameNbackViewModel(
   private fun updateMultiplier(correct: Boolean) {
     return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
     else multiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
+  }
+
+  fun onGameStarted() {
+    showLevelUnlocked.value = false
   }
 
   enum class FeedbackState {

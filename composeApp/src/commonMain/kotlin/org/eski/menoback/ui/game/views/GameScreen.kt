@@ -125,7 +125,11 @@ fun GameScreen(
             }
         }
 
-        GameQuitButton(visible = gameState == GameState.Paused, containerSize = size, onExpanded = { vm.quitGame() })
+        GameQuitButton(
+            visible = gameState == GameState.Paused || gameState == GameState.GameOver,
+            containerSize = size,
+            onExpanded = { vm.quitGame() }
+        )
         GameStartButton(vm, true, containerSize = size)
     }
 

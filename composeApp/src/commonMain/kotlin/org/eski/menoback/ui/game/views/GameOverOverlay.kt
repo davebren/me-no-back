@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.eski.menoback.ui.game.data.NbackProgressData
+import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.MatchStats
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
@@ -54,11 +54,8 @@ fun GameOverOverlay(
     val currentHighScore by vm.currentHighScore.collectAsState()
     val matchStats by vm.nback.matchStats.collectAsState()
     val nbackLevel by vm.nback.level.collectAsState()
-    val maxLevel by vm.nback.maxLevel.collectAsState()
     val isNewHighScore = score >= currentHighScore && gameState == GameState.GameOver
-    val isLevelUpAccuracy = matchStats.accuracyPercentage >= NbackProgressData.accuracyThreshold
-    val isAtMaxLevel = nbackLevel >= maxLevel - 1 // If we're one below the max, we can level up
-    val showLevelUp = isLevelUpAccuracy && isAtMaxLevel && gameState == GameState.GameOver
+    val showLevelUp by vm.nback.showLevelUnlocked.collectAsState()
 
     // Only display the overlay when the game is over
     AnimatedVisibility(
@@ -271,8 +268,8 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
             // Show level progression indicator
             val accuracy = matchStats.accuracyPercentage
             val accentColor = when {
-                accuracy >= NbackProgressData.accuracyThreshold -> Color.Green
-                accuracy >= NbackProgressData.accuracyThreshold * 0.8f -> Color.Yellow
+                accuracy >= GameStatsData.accuracyThreshold -> Color.Green
+                accuracy >= GameStatsData.accuracyThreshold * 0.8f -> Color.Yellow
                 else -> Color.Red
             }
 
@@ -324,10 +321,10 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
         StatRow("Total Decisions", matchStats.totalDecisions.toString(), Color.White)
 
         // Show progression target
-        if (matchStats.accuracyPercentage < NbackProgressData.accuracyThreshold) {
+        if (matchStats.accuracyPercentage < GameStatsData.accuracyThreshold) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Need ${NbackProgressData.accuracyThreshold}% accuracy to unlock level ${nbackLevel + 1}",
+                text = "Need ${GameStatsData.accuracyThreshold}% accuracy to unlock level ${nbackLevel + 1}",
                 color = Color.LightGray,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
