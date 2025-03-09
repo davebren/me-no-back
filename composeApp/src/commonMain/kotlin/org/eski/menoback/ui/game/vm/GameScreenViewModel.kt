@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +33,8 @@ import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.data.gameStatsData as defaultGameStatsData
 import org.eski.util.deepCopy
 import org.eski.util.equalsIgnoreOrder
+import org.eski.util.launchCollect
+import org.eski.util.launchCollectLatest
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -41,6 +44,7 @@ const val nbackBaseMatchChance = 0.2f
 const val nbackMatchChanceGrowthFactor = 0.1f
 const val nbackMatchChanceDecayFactor = 0.05f
 const val initialGameTickRate = 1000L
+const val fastestTickRate = 200L
 
 class GameScreenViewModel(
   private val gameSettings: GameSettings,
@@ -105,11 +109,16 @@ class GameScreenViewModel(
   private var timerJob: Job? = null
 
   init {
-    viewModelScope.launch {
-      gameSettings.gameDuration.collect { duration ->
-        if (_gameState.value == GameState.NotStarted) {
-          timeRemaining.value = duration
-        }
+    gameSettings.gameDuration.launchCollect(viewModelScope) { duration ->
+      if (_gameState.value == GameState.NotStarted) {
+        timeRemaining.value = duration
+      }
+    }
+
+    nback.streak.launchCollectLatest(viewModelScope) { streak ->
+      if (streak > 0 && (streak % 5) == 0) {
+        val speedIncrease = (gameSpeed.value - fastestTickRate) / 10
+        gameSpeed.value -= speedIncrease
       }
     }
   }
@@ -180,11 +189,11 @@ class GameScreenViewModel(
 
     if (!moveTetriminoDown()) {
       lockTetrimino()
-      if (!spawnNewPiece()) gameOver()
+      if (!spawnNewPiece()) gameOver(false)
     }
   }
 
-  private fun gameOver() {
+  private fun gameOver(timeElapsed: Boolean) {
     val currentScore = score.value
     val nBack = gameSettings.nbackSetting.value
     val gameDuration = gameSettings.gameDuration.value
@@ -192,7 +201,7 @@ class GameScreenViewModel(
     if (currentScore > currentHighScore.value) gameStatsData.putHighScore(currentScore, gameDuration, nBack)
     gameSettings.gameDuration.value = gameDuration.toInt() // TODO: Find a better way to update the current high score.
 
-    val newLevelUnlocked = nback.checkLevelProgression()
+    if (timeElapsed) nback.checkLevelProgression()
 
     _gameState.value = GameState.GameOver
     gameJob?.cancel()
@@ -243,7 +252,7 @@ class GameScreenViewModel(
 
     while (moveTetriminoDown());
     lockTetrimino()
-    if (!spawnNewPiece()) gameOver()
+    if (!spawnNewPiece()) gameOver(false)
   }
 
   fun downClicked(): Boolean {
@@ -420,7 +429,7 @@ class GameScreenViewModel(
       }
 
       if (timeRemaining.value <= 0 && _gameState.value == GameState.Running) {
-        gameOver()
+        gameOver(true)
       }
     }
   }

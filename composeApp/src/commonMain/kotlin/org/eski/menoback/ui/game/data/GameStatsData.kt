@@ -8,7 +8,7 @@ class GameStatsData(val settings: Settings) {
     companion object {
         private const val statsKey = "stats.game"
         private const val unlockedLevelKey = "settings.nback.unlockedLevel"
-        const val accuracyThreshold = 85f
+        const val accuracyThreshold = 90f
         const val defaultLevelUnlocked = 2
         
         private fun highScoreKey(durationSeconds: Int, nback: List<NbackStimulus>): String {

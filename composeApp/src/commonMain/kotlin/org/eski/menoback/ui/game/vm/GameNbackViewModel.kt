@@ -88,6 +88,9 @@ class GameNbackViewModel(
    * Returns true if a new level was unlocked
    */
   fun checkLevelProgression(): Boolean {
+    val totalDecisionsRequired = gameSettings.gameDuration.value / 3
+    if (matchStats.value.totalDecisions >= totalDecisionsRequired) return false
+
     val accuracy = matchStats.value.accuracyPercentage
     if (accuracy >= GameStatsData.accuracyThreshold) {
       val currentMaxLevel = gameStatsData.unlockedLevel(gameSettings.gameDuration.value, setting.value)

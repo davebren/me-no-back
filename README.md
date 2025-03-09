@@ -14,11 +14,14 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 - Recursive gravity
 - Add invisible top row
 - Dig mode
-- Lock n-back levels and create progression requiring match %
 - Multiplayer
 - Blind mode
 - Add sound effects
   - Add mute button
+- Achievements
+  - Level progressions
+  - High score achievements
+  - Number of blocks stacked + match accuracy
 
 
 ### Bugs
