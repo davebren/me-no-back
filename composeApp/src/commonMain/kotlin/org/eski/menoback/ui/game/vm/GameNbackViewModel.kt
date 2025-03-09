@@ -89,7 +89,7 @@ class GameNbackViewModel(
    */
   fun checkLevelProgression(): Boolean {
     val totalDecisionsRequired = gameSettings.gameDuration.value / 3
-    if (matchStats.value.totalDecisions >= totalDecisionsRequired) return false
+    if (matchStats.value.totalDecisions < totalDecisionsRequired) return false
 
     val accuracy = matchStats.value.accuracyPercentage
     if (accuracy >= GameStatsData.accuracyThreshold) {
