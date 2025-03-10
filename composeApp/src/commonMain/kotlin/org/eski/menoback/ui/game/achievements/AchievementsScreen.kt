@@ -1,16 +1,10 @@
 package org.eski.menoback.ui.game.achievements
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +16,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,20 +26,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.datetime.Clock
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.selects.select
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.eski.ui.util.grid
-import org.eski.ui.util.grid2
 
 @Composable
 fun AchievementsScreen(
-    achievements: AchievementCollection,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    vm: AchievementsViewModel,
 ) {
-    var selectedTab by remember { mutableStateOf(AchievementType.LEVEL_PROGRESSION) }
-    val tabs = remember { AchievementType.values().toList() }
+    val selectedType by vm.typeDisplayed.collectAsState()
+    val tabs by vm.tabs.collectAsState()
+    val displayedAchievements by vm.displayedAchievements.collectAsState()
     
     Dialog(
         onDismissRequest = onDismiss,
@@ -99,17 +92,17 @@ fun AchievementsScreen(
                 
                 // Achievement category tabs
                 ScrollableTabRow(
-                    selectedTabIndex = tabs.indexOf(selectedTab),
+                    selectedTabIndex = tabs.indexOf(selectedType),
                     backgroundColor = Color(0xFF444444),
                     contentColor = Color.White,
                     edgePadding = 0.dp,
                     divider = { Divider(color = Color.Transparent, thickness = 0.dp) }
                 ) {
                     tabs.forEach { tab ->
-                        val isSelected = selectedTab == tab
+                        val isSelected = selectedType == tab
                         Tab(
                             selected = isSelected,
-                            onClick = { selectedTab = tab },
+                            onClick = { vm.typeClicked(tab) },
                             text = {
                                 Text(
                                     text = formatTabName(tab),
@@ -124,12 +117,8 @@ fun AchievementsScreen(
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                // Achievement list
-                val achievementsForTab = achievements.getAchievementsByType(selectedTab)
-                    .sortedWith(compareBy({ it.isLocked }, { -it.requiredValue }))
-                
-                if (achievementsForTab.isEmpty()) {
+
+                if (displayedAchievements.isEmpty()) {
                     EmptyAchievementsView()
                 } else {
                     LazyColumn(
@@ -138,14 +127,12 @@ fun AchievementsScreen(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(achievementsForTab) { achievement ->
+                        items(displayedAchievements) { achievement ->
                             AchievementItem(achievement = achievement)
                         }
                     }
                 }
-                
-                // Footer with stats
-                AchievementsFooter(achievements)
+                AchievementsFooter(vm)
             }
         }
     }
@@ -182,10 +169,9 @@ private fun EmptyAchievementsView() {
 }
 
 @Composable
-private fun AchievementsFooter(achievements: AchievementCollection) {
-    val allAchievements = achievements.getAllAchievements()
-    val unlockedCount = allAchievements.count { !it.isLocked }
-    val totalCount = allAchievements.size
+private fun AchievementsFooter(vm: AchievementsViewModel) {
+    val totalCount by vm.totalAchievementCount.collectAsState()
+    val unlockedCount by vm.unlockedAchievementCount.collectAsState()
     val completionPercentage = if (totalCount > 0) (unlockedCount.toFloat() / totalCount.toFloat()) * 100 else 0f
     
     Column(
@@ -233,128 +219,15 @@ private fun AchievementsFooter(achievements: AchievementCollection) {
 }
 
 @Composable
-fun AchievementItem(achievement: Achievement) {
-    val progressAnimation by animateFloatAsState(
-        targetValue = achievement.progress,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-    )
-    
-    val backgroundColor = if (achievement.isLocked) {
-        Color(0xFF444444)
-    } else {
-        Color(0xFF1E5F74)
-    }
-    
-    Card(
-        backgroundColor = backgroundColor,
-        shape = RoundedCornerShape(8.dp),
-        elevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AchievementIcon(
-                        achievement = achievement,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(12.dp))
-                    
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = achievement.title,
-                            color = if (achievement.isLocked) Color.Gray else Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        
-                        Text(
-                            text = achievement.description,
-                            color = if (achievement.isLocked) Color.Gray.copy(alpha = 0.7f) else Color.LightGray,
-                            fontSize = 14.sp,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        
-                        if (achievement.isLocked && achievement.type != AchievementType.SPECIAL) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            
-                            LinearProgressIndicator(
-                                progress = progressAnimation,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp)),
-                                color = Color.Cyan,
-                                backgroundColor = Color.DarkGray.copy(alpha = 0.5f)
-                            )
-                            
-                            Text(
-                                text = "${(progressAnimation * 100).toInt()}%",
-                                color = Color.Gray,
-                                fontSize = 12.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.End
-                            )
-                        }
-                    }
-                    
-                    if (!achievement.isLocked) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Completed",
-                            tint = Color.Green,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-                
-                // Show completion date for unlocked achievements
-                if (!achievement.isLocked && achievement.completedTimestamp != null) {
-                    Text(
-                        text = "Completed ${formatTimestamp(achievement.completedTimestamp)}",
-                        color = Color.LightGray.copy(alpha = 0.7f),
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        textAlign = TextAlign.End
-                    )
-                }
-            }
-            
-            if (achievement.isLocked) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(Color(0x40000000))
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AchievementIcon(achievement: Achievement, modifier: Modifier = Modifier) {
+fun AchievementIcon(achievement: Achievement, modifier: Modifier = Modifier) {
     var iconModifier = modifier
         .clip(CircleShape)
         .border(
             width = 2.dp,
-            color = if (achievement.isLocked) Color.Gray else Color.Yellow,
+            color = if (!achievement.unlocked) Color.Gray else Color.Yellow,
             shape = CircleShape
         )
-    iconModifier = if (achievement.isLocked) iconModifier.background(Color.DarkGray)
+    iconModifier = if (!achievement.unlocked) iconModifier.background(Color.DarkGray)
         else iconModifier.background(Brush.radialGradient(
             colors = listOf(Color(0xFFFFD700), Color(0xFFFFA500)),
             radius = 48f
@@ -364,8 +237,8 @@ private fun AchievementIcon(achievement: Achievement, modifier: Modifier = Modif
         modifier = iconModifier,
         contentAlignment = Alignment.Center
     ) {
-        val icon = getIconForAchievement(achievement)
-        val tint = if (achievement.isLocked) Color.Gray.copy(alpha = 0.5f) else Color.White
+        val icon = achievement.icon
+        val tint = if (!achievement.unlocked) Color.Gray.copy(alpha = 0.5f) else Color.White
         
         Icon(
             imageVector = icon,
@@ -374,7 +247,7 @@ private fun AchievementIcon(achievement: Achievement, modifier: Modifier = Modif
             modifier = Modifier.size(28.dp)
         )
         
-        if (achievement.isLocked) {
+        if (!achievement.unlocked) {
             Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = "Locked",
@@ -410,35 +283,27 @@ fun AchievementUnlockedBadge(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun getIconForAchievement(achievement: Achievement) = when (achievement.type) {
-    AchievementType.LEVEL_PROGRESSION -> Icons.Default.Psychology
-    AchievementType.HIGH_SCORE -> Icons.Default.EmojiEvents
-    AchievementType.STREAK -> Icons.Default.Bolt
-    AchievementType.ACCURACY -> Icons.Default.MyLocation
-    AchievementType.GAME_COUNT -> Icons.Default.SportsEsports
-    AchievementType.SPECIAL -> Icons.Default.Star
-}
+//@Composable
+//fun getIconForAchievement(achievement: Achievement) = when (achievement.type) {
+//    AchievementType.LEVEL_PROGRESSION -> Icons.Default.Psychology
+//    AchievementType.HIGH_SCORE -> Icons.Default.EmojiEvents
+//    AchievementType.STREAK -> Icons.Default.Bolt
+//    AchievementType.ACCURACY -> Icons.Default.MyLocation
+//    AchievementType.GAME_COUNT -> Icons.Default.SportsEsports
+//    AchievementType.SPECIAL -> Icons.Default.Star
+//}
 
 private fun formatTabName(type: AchievementType): String = when (type) {
     AchievementType.LEVEL_PROGRESSION -> "Levels"
     AchievementType.HIGH_SCORE -> "Scores"
-    AchievementType.STREAK -> "Streaks"
     AchievementType.ACCURACY -> "Accuracy"
-    AchievementType.GAME_COUNT -> "Games"
     AchievementType.SPECIAL -> "Special"
 }
 
 private fun formatTimestamp(timestamp: Long): String {
     val instant = Instant.fromEpochMilliseconds(timestamp)
-    val now = Clock.System.now()
-    val diff = now.toEpochMilliseconds() - timestamp
-    
+
     return when {
-//        diff < TimeUnit.MINUTES.toMillis(1) -> "just now"
-//        diff < TimeUnit.HOURS.toMillis(1) -> "${diff / TimeUnit.MINUTES.toMillis(1)} minutes ago"
-//        diff < TimeUnit.DAYS.toMillis(1) -> "${diff / TimeUnit.HOURS.toMillis(1)} hours ago"
-//        diff < TimeUnit.DAYS.toMillis(7) -> "${diff / TimeUnit.DAYS.toMillis(1)} days ago"
         else -> {
             val date = instant.toLocalDateTime(TimeZone.currentSystemDefault())
             "${date.month.name.lowercase().capitalize()} ${date.dayOfMonth}, ${date.year}"

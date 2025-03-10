@@ -156,7 +156,7 @@ private fun AchievementToast(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = getIconForAchievement(achievement),
+                            imageVector = achievement.icon,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier

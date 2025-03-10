@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -24,6 +23,8 @@ import org.eski.menoback.ui.game.model.boardHeight
 import org.eski.menoback.ui.game.model.boardWidth
 import org.eski.menoback.ui.game.model.newTetriminoStartPosition
 import org.eski.menoback.ui.TetriminoColors
+import org.eski.menoback.ui.game.achievements.AchievementsData
+import org.eski.menoback.ui.game.achievements.AchievementsViewModel
 import org.eski.menoback.ui.game.model.Rotation
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
@@ -31,6 +32,7 @@ import org.eski.menoback.ui.game.model.NbackStimulus
 import org.eski.menoback.ui.game.model.NbackTetriminoColor
 import org.eski.menoback.ui.game.model.TetriminoHistory
 import org.eski.menoback.data.gameStatsData as defaultGameStatsData
+import org.eski.menoback.data.achievementsData as defaultAchievementsData
 import org.eski.util.deepCopy
 import org.eski.util.equalsIgnoreOrder
 import org.eski.util.launchCollect
@@ -48,10 +50,12 @@ const val fastestTickRate = 200L
 
 class GameScreenViewModel(
   private val gameSettings: GameSettings,
-  private val gameStatsData: GameStatsData = defaultGameStatsData
+  private val gameStatsData: GameStatsData = defaultGameStatsData,
+  private val achievementsData: AchievementsData = defaultAchievementsData,
 ) : ViewModel() {
   val appColors = MutableStateFlow(AppColors())
   val tetriminoColors = MutableStateFlow(TetriminoColors())
+  val achievements = AchievementsViewModel(viewModelScope, gameStatsData, achievementsData)
 
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
@@ -200,8 +204,8 @@ class GameScreenViewModel(
 
     if (currentScore > currentHighScore.value) gameStatsData.putHighScore(currentScore, gameDuration, nBack)
     gameSettings.gameDuration.value = gameDuration.toInt() // TODO: Find a better way to update the current high score.
-
-    if (timeElapsed) nback.checkLevelProgression()
+    val nextLevelUnlocked = timeElapsed && nback.checkLevelProgression()
+    achievements.checkAchievements(nextLevelUnlocked, nback.setting.value)
 
     _gameState.value = GameState.GameOver
     gameJob?.cancel()
