@@ -43,35 +43,7 @@ fun GameHeader(
   Column(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    Text(
-      text = "MeNoBack",
-      fontSize = 24.sp,
-      fontWeight = FontWeight.Bold,
-      color = Color.LightGray,
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // High score display - only show on start screen
-    if (gameState == GameState.NotStarted) {
-      Card(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(bottom = 8.dp),
-        backgroundColor = Color(0xFF444444),
-        shape = RoundedCornerShape(8.dp),
-        elevation = 2.dp
-      ) {
-        Text(
-          text = highScoreText,
-          fontSize = 16.sp,
-          fontWeight = FontWeight.Medium,
-          color = Color.Yellow,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.padding(vertical = 8.dp)
-        )
-      }
-    }
+    HighScore(gameState, highScoreText)
 
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -138,6 +110,30 @@ fun GameHeader(
           valueTextColor = timerColor
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun HighScore(gameState: GameState, highScoreText: String) {
+  // High score display - only show on start screen
+  if (gameState == GameState.NotStarted) {
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 8.dp),
+      backgroundColor = Color(0xFF444444),
+      shape = RoundedCornerShape(8.dp),
+      elevation = 2.dp
+    ) {
+      Text(
+        text = highScoreText,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Yellow,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(vertical = 8.dp)
+      )
     }
   }
 }

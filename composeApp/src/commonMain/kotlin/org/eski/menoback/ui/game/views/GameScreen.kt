@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.collectLatest
 import org.eski.menoback.data.keyBindingSettings
 import org.eski.menoback.data.gameStatsData
 import org.eski.menoback.data.introSettings
@@ -44,21 +45,11 @@ fun GameScreen(
 ) {
     val gameState by vm.gameState.collectAsState()
     val feedbackMode by vm.feedbackMode.collectAsState()
-    var showKeyBindingDialog by remember { mutableStateOf(false) }
-    var showIntroDialog by remember { mutableStateOf(false) }
-    var showAchievementsDialog by remember { mutableStateOf(false) }
     var size by remember { mutableStateOf(IntSize(0, 0)) }
 
-    // Check if the intro has been shown before
-    val introShown by introSettings.introShown.collectAsState()
-
-    // Show intro dialog on first launch
-    LaunchedEffect(Unit) {
-        if (!introShown) {
-            showIntroDialog = true
-            introSettings.setIntroShown(true)
-        }
-    }
+    val introShowing by vm.options.introShowing.collectAsState()
+    val settingsShowing by vm.options.settingsShowing.collectAsState()
+    val achievementsShowing by vm.options.achievementsShowing.collectAsState()
 
     KeyboardInput(vm, keyBindings)
 
@@ -71,68 +62,6 @@ fun GameScreen(
             .background(color = Color.DarkGray)
             .onSizeChanged { size = it }
     ) {
-        // Top Row with buttons
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = gridHalf),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Info button on top left
-            IconButton(
-                modifier = Modifier
-                    .size(grid6)
-                    .padding(gridHalf),
-                onClick = {
-                    if (gameState == GameState.Running) {
-                        vm.pauseBindingInvoked()
-                    }
-                    showIntroDialog = true
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Game Information",
-                    tint = Color.White,
-                )
-            }
-
-            // Achievements button in center
-            IconButton(
-                modifier = Modifier
-                    .size(grid6)
-                    .padding(gridHalf),
-                onClick = {
-                    if (gameState == GameState.Running) {
-                        vm.pauseBindingInvoked()
-                    }
-                    showAchievementsDialog = true
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = "Achievements",
-                    tint = Color.Yellow,
-                )
-            }
-
-            // Settings button on top right
-            IconButton(
-                modifier = Modifier
-                    .size(grid6)
-                    .padding(gridHalf),
-                onClick = {
-                    vm.pauseBindingInvoked()
-                    showKeyBindingDialog = true
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = Color.White,
-                )
-            }
-        }
 
         Column(
             modifier = Modifier
@@ -140,6 +69,7 @@ fun GameScreen(
                 .padding(grid2),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            ActionBarMenu(vm)
             GameHeader(vm, gameSettings)
             Spacer(modifier = Modifier.height(grid2))
 
@@ -161,39 +91,25 @@ fun GameScreen(
         GameStartButton(vm, true, containerSize = size)
     }
 
-    if (showKeyBindingDialog) {
+    if (settingsShowing) {
         KeyBindingSettingsDialog(
             keyBindingSettings = keyBindings,
             gameSettings = gameSettings,
-            onDismiss = { showKeyBindingDialog = false }
+            onDismiss = { vm.options.settingsDismissed() }
         )
     }
 
-    if (showIntroDialog) {
+    if (introShowing) {
         GameIntroDialog(
-            isFirstLaunch = !introShown,
-            onDismiss = {
-                showIntroDialog = false
-                if (gameState == GameState.Paused) {
-                    vm.resumeGame()
-                }
-            },
-            onOpenSettings = {
-                showIntroDialog = false
-                showKeyBindingDialog = true
-            }
+            onDismiss = { vm.options.introDismissed() },
+            onOpenSettings = { vm.options.settingsClicked() }
         )
     }
 
-    if (showAchievementsDialog) {
+    if (achievementsShowing) {
         AchievementsScreen(
             vm = vm.achievements,
-            onDismiss = {
-                showAchievementsDialog = false
-                if (gameState == GameState.Paused) {
-                    vm.resumeGame()
-                }
-            }
+            onDismiss = { vm.options.achievementsDismissed() }
         )
     }
 }

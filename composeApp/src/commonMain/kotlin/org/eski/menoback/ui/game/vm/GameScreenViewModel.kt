@@ -53,6 +53,8 @@ class GameScreenViewModel(
   private val gameStatsData: GameStatsData = defaultGameStatsData,
   private val achievementsData: AchievementsData = defaultAchievementsData,
 ) : ViewModel() {
+  val options = GameOptionsViewModel(viewModelScope, this)
+
   val appColors = MutableStateFlow(AppColors())
   val tetriminoColors = MutableStateFlow(TetriminoColors())
   val achievements = AchievementsViewModel(viewModelScope, gameStatsData, achievementsData)

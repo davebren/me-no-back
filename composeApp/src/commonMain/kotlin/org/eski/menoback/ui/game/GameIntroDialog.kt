@@ -19,11 +19,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.eski.ui.util.grid6
-import org.eski.ui.util.grid8
+
 
 @Composable
 fun GameIntroDialog(
-    isFirstLaunch: Boolean = true,
     onDismiss: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
@@ -54,7 +53,7 @@ fun GameIntroDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isFirstLaunch) "Welcome to MeNoBack!" else "How to Play",
+                        text = "Welcome to MeNoBack!",
                         color = Color.White,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
