@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import kotlinx.coroutines.delay
+import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.vm.GameNbackViewModel.FeedbackState
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
@@ -21,7 +22,9 @@ const val feedbackDurationMillis = 300
 @Composable
 fun Modifier.feedback(vm: GameScreenViewModel): Modifier = composed {
   val feedbackState by vm.nback.feedback.collectAsState()
-  if (feedbackState == FeedbackState.none) return@composed this@composed
+  val feedbackMode by vm.feedbackMode.collectAsState()
+
+  if (feedbackMode == FeedbackMode.none || feedbackState == FeedbackState.none) return@composed this@composed
 
   var animationTriggered by remember { mutableStateOf(false) }
   val animationAlpha by animateFloatAsState(
@@ -42,7 +45,8 @@ fun Modifier.feedback(vm: GameScreenViewModel): Modifier = composed {
     animationTriggered = false
   }
 
-  drawBehind {
+
+  return@composed drawBehind {
     drawRect(
       color = feedbackColor.copy(alpha = animationAlpha),
       size = size

@@ -27,12 +27,9 @@ import org.eski.menoback.ui.keybinding.KeyBindingSettings
 import org.eski.menoback.ui.keybinding.KeyBindingSettingsDialog
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
-import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.keybinding.KeyboardInput
 import org.eski.ui.util.grid2
-import org.eski.ui.util.grid6
-import org.eski.ui.util.gridHalf
 
 @Composable
 fun GameScreen(
@@ -44,7 +41,6 @@ fun GameScreen(
     }
 ) {
     val gameState by vm.gameState.collectAsState()
-    val feedbackMode by vm.feedbackMode.collectAsState()
     var size by remember { mutableStateOf(IntSize(0, 0)) }
 
     val introShowing by vm.options.introShowing.collectAsState()
@@ -53,14 +49,12 @@ fun GameScreen(
 
     KeyboardInput(vm, keyBindings)
 
-    val backgroundModifier = Modifier
-    if (feedbackMode == FeedbackMode.flashBackground) backgroundModifier.feedback(vm)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.DarkGray)
             .onSizeChanged { size = it }
+            .feedback(vm)
     ) {
 
         Column(
