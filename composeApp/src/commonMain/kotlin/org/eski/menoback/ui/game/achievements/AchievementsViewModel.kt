@@ -45,17 +45,29 @@ class AchievementsViewModel(val scope: CoroutineScope, val statsData: GameStatsD
   private fun levelAchievements(): List<LevelAchievement> {
     val achievements = mutableListOf<LevelAchievement>()
 
-    val levels = listOf(3, 4, 5, 6, 7, 8, 9, 10)
-    levels.forEach { level ->
+    val singleLevelAchievements = listOf(3, 4, 5, 6, 7, 8, 9, 10)
+    singleLevelAchievements.forEach { level ->
       achievements.add(
         LevelAchievement(
           requiredStimuli = emptyList(),
+          requiredStimuliCount = null,
           requiredLevel = level,
           title = "N-back Master Level $level",
           description = "Unlock the $level-Back level for any game mode",
           unlocked = data.levelAchieved(level),
         )
       )
+    }
+    val dualLevelAchievements = listOf(3, 4, 5, 6)
+    dualLevelAchievements.forEach { level ->
+      achievements.add(LevelAchievement(
+        requiredStimuli = emptyList(),
+        requiredStimuliCount = 2,
+        requiredLevel = level,
+        title = "Dual N-back Master Level $level",
+        description = "Unlock the $level-Back level with two n-back stimuli enabled.",
+        unlocked = data.levelAchieved(level, 2)
+      ))
     }
     return achievements
   }
@@ -72,8 +84,10 @@ class AchievementsViewModel(val scope: CoroutineScope, val statsData: GameStatsD
 
     levelAchievements.value = levelAchievements.value.map { achievement ->
       if (!achievement.unlocked && nbackSetting.first().level == (achievement.requiredLevel - 1)
-        && nbackSetting.containsAll(achievement.requiredStimuli)) {
-        data.putLevelAchieved(achievement.requiredLevel)
+        && nbackSetting.containsAll(achievement.requiredStimuli)
+        && nbackSetting.size >= (achievement.requiredStimuliCount ?: 1)) {
+
+        data.putLevelAchieved(achievement.requiredLevel, achievement.requiredStimuliCount)
         achievement.copy(unlocked = true)
       } else achievement
     }

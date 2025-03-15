@@ -7,6 +7,7 @@ import org.eski.menoback.ui.game.model.NbackStimulus
 
 data class LevelAchievement(
   val requiredStimuli: List<NbackStimulus>,
+  val requiredStimuliCount: Int?,
   val requiredLevel: Int,
   override val title: String,
   override val description: String,

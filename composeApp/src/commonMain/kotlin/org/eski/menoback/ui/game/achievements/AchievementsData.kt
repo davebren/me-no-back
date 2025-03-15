@@ -1,7 +1,6 @@
 package org.eski.menoback.ui.game.achievements
 
 import com.russhwolf.settings.Settings
-import com.russhwolf.settings.get
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.model.MatchStats
 import org.eski.menoback.ui.game.model.NbackStimulus
@@ -11,7 +10,8 @@ class AchievementsData(private val settings: Settings, val stats: GameStatsData)
         private const val achievementsKey = "settings.achievements"
         private const val levelAchievementKey = "$achievementsKey.levelAchieved"
 
-        fun levelAchievementKey(level: Int) = "$levelAchievementKey.$level"
+        fun levelAchievementKey(level: Int, stimuliRequired: Int?) = "$levelAchievementKey.$level" +
+            if (stimuliRequired != null) ".$stimuliRequired" else ""
     }
 
     fun processGameResults(
@@ -23,6 +23,8 @@ class AchievementsData(private val settings: Settings, val stats: GameStatsData)
         stats.incrementGamesPlayed()
     }
 
-    fun levelAchieved(level: Int) = settings.getBoolean(levelAchievementKey(level), false)
-    fun putLevelAchieved(level: Int) = settings.putBoolean(levelAchievementKey(level), true)
+    fun levelAchieved(level: Int, stimuliRequired: Int? = null)
+        = settings.getBoolean(levelAchievementKey(level, stimuliRequired), false)
+    fun putLevelAchieved(level: Int, stimuliRequired: Int? = null)
+        = settings.putBoolean(levelAchievementKey(level, stimuliRequired), true)
 }
