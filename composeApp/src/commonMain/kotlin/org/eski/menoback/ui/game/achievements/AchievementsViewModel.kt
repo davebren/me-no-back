@@ -28,6 +28,16 @@ class AchievementsViewModel(val scope: CoroutineScope, val statsData: GameStatsD
   val unlockedAchievementCount = allAchievements.map { it.count { achievement -> achievement.unlocked } }
     .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
+  val achievementProgress: StateFlow<Float> = combine(totalAchievementCount, unlockedAchievementCount) { total, unlocked ->
+    unlocked.toFloat() / total.toFloat()
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), 0f)
+
+  val achievementPercentageText: StateFlow<String> = achievementProgress.map { progress ->
+    val percentage = progress * 100f
+    if (!percentage.toString().contains('.')) "${percentage}%"
+    else "${percentage.toString().subSequence(0, percentage.toString().indexOf('.') + 2)}%"
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), "0%")
+
   val tabs = MutableStateFlow<List<AchievementType>>(AchievementType.entries.toList())
   val typeDisplayed = MutableStateFlow<AchievementType>(AchievementType.entries.first())
   val displayedAchievements = combine(typeDisplayed, levelAchievements, scoreAchievements, accuracyAchievements, specialAchievements) {
@@ -65,7 +75,7 @@ class AchievementsViewModel(val scope: CoroutineScope, val statsData: GameStatsD
         requiredStimuliCount = 2,
         requiredLevel = level,
         title = "Dual N-back Master Level $level",
-        description = "Unlock the $level-Back level with two n-back stimuli enabled.",
+        description = "Unlock the $level-Back level with two n-back stimuli enabled",
         unlocked = data.levelAchieved(level, 2)
       ))
     }

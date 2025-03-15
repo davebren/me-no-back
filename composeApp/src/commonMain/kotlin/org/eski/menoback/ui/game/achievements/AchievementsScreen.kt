@@ -170,10 +170,11 @@ private fun EmptyAchievementsView() {
 
 @Composable
 private fun AchievementsFooter(vm: AchievementsViewModel) {
+    val progress by vm.achievementProgress.collectAsState()
+    val completionPercentage by vm.achievementPercentageText.collectAsState()
     val totalCount by vm.totalAchievementCount.collectAsState()
     val unlockedCount by vm.unlockedAchievementCount.collectAsState()
-    val completionPercentage = if (totalCount > 0) (unlockedCount.toFloat() / totalCount.toFloat()) * 100 else 0f
-    
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -197,8 +198,8 @@ private fun AchievementsFooter(vm: AchievementsViewModel) {
             )
             
             Text(
-                text = completionPercentage.toString(), // TODO: Format.
-                color = if (completionPercentage > 50) Color.Cyan else Color.LightGray,
+                text = completionPercentage, // TODO: Format.
+                color = Color.LightGray,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -207,7 +208,7 @@ private fun AchievementsFooter(vm: AchievementsViewModel) {
         Spacer(modifier = Modifier.height(8.dp))
         
         LinearProgressIndicator(
-            progress = completionPercentage / 100,
+            progress = progress,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
@@ -298,15 +299,4 @@ private fun formatTabName(type: AchievementType): String = when (type) {
     AchievementType.HIGH_SCORE -> "Scores"
     AchievementType.ACCURACY -> "Accuracy"
     AchievementType.SPECIAL -> "Special"
-}
-
-private fun formatTimestamp(timestamp: Long): String {
-    val instant = Instant.fromEpochMilliseconds(timestamp)
-
-    return when {
-        else -> {
-            val date = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-            "${date.month.name.lowercase().capitalize()} ${date.dayOfMonth}, ${date.year}"
-        }
-    }
 }
