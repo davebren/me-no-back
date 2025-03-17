@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,7 +44,9 @@ import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.vm.ValueForValueViewModel
 import org.eski.ui.animation.AnimateView
 import org.eski.ui.util.PlatformBackHandler
+import org.eski.ui.util.grid
 import org.eski.ui.util.grid2
+import org.eski.ui.util.grid6
 import org.eski.ui.views.spacer
 
 
@@ -64,37 +67,38 @@ private val dividerColor = Color(0x33FFFFFF)
   Box(
     modifier = Modifier.fillMaxWidth().padding(grid2)
   ) {
-    var modifier = Modifier.fillMaxWidth()
+    // Back button
+    BackButton(vm, visible)
+
+    // Title
+    AnimateView(
+      modifier = Modifier.align(alignment = Alignment.TopCenter).offset(y = grid),
+      visible = visible,
+      enter = fadeIn(animationSpec = tween(300, 200)),
+      exit = fadeOut(animationSpec = tween(150, 0))
+    ) {
+      Text(
+        "Value for Value",
+        fontSize = 28.sp,
+        fontWeight = FontWeight.Bold,
+        color = textColor,
+      )
+    }
+
+    var modifier = Modifier.fillMaxWidth().offset(y = grid6)
     if (visible) modifier = modifier.verticalScroll(scrollState)
 
     Column(
       modifier = modifier
     ) {
-      Spacer(modifier = Modifier.height(grid2 * 2))
-
-      // Title
-      AnimateView(
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(300, 200)),
-        exit = fadeOut(animationSpec = tween(150, 0))
-      ) {
-        Text(
-          "Value for Value",
-          fontSize = 28.sp,
-          fontWeight = FontWeight.Bold,
-          color = textColor,
-        )
-      }
-
       spacer(height = grid2)
 
       // Main description card
       AnimateView(
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
         visible = visible,
-        enter = slideInHorizontally(animationSpec = tween(300, 200), initialOffsetX = { width -> width / 2 }),
-        exit = slideOutHorizontally(targetOffsetX = { width -> width / 2 })
+        enter = slideInHorizontally(animationSpec = tween(200, 0), initialOffsetX = { width -> width }),
+        exit = slideOutHorizontally(targetOffsetX = { width -> width })
       ) {
         Card(
           backgroundColor = primaryCardColor,
@@ -159,9 +163,6 @@ private val dividerColor = Color(0x33FFFFFF)
 
       spacer(height = grid2 * 3)
     }
-
-    // Back button
-    BackButton(vm, visible)
   }
 }
 
@@ -176,7 +177,7 @@ private fun ValueSection(
 ) {
   AnimateView(
     visible = visible,
-    enter = slideInHorizontally(animationSpec = tween(300, delay), initialOffsetX = { width -> width }),
+    enter = slideInHorizontally(animationSpec = tween(200, delay), initialOffsetX = { width -> width }),
     exit = slideOutHorizontally(targetOffsetX = { width -> width })
   ) {
     Card(
@@ -298,7 +299,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     icon = Icons.Default.MonetizationOn,
     color = treasureColor,
     visible = visible,
-    delay = 500
+    delay = 100
   ) {
     Text(
       "Financial support helps ensure continued development:",
@@ -329,7 +330,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     icon = Icons.Default.AccessTime,
     color = timeColor,
     visible = visible,
-    delay = 300
+    delay = 200
   ) {
     Text(
       "Spread the word about MeNoBack! Some ways to contribute your time:",
@@ -352,7 +353,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     icon = Icons.Default.Code,
     color = talentColor,
     visible = visible,
-    delay = 400
+    delay = 300
   ) {
     Text(
       "Contribute your skills to help improve MeNoBack:",
