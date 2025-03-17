@@ -80,7 +80,6 @@ fun ValueForValueButton(
         verticalPadding = verticalPadding,
         cornerRadius = PressExpandButtonState.Map(unpressed = 40.dp, pressed = 44.dp, expanded = 0.dp),
         backgroundColor = PressExpandButtonState.staticMap(Color(223, 96, 80)),
-        border = BorderStroke(4.dp, Color.DarkGray),
         expandedStateFlow = vm.menuShowing
       ) { transition ->
         expandedFinished.value = transition.currentState == expanded && transition.targetState == expanded

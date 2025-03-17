@@ -78,7 +78,6 @@ fun GameQuitButton(
         verticalPadding = verticalPadding,
         cornerRadius = PressExpandButtonState.Map(unpressed = 40.dp, pressed = 44.dp, expanded = 0.dp),
         backgroundColor = PressExpandButtonState.staticMap(Color(0xc9, 0x6f, 0x65)),
-        border = BorderStroke(4.dp, Color.DarkGray)
       ) { transition ->
         expandedFinished.value = transition.currentState == expanded && transition.targetState == expanded
 

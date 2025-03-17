@@ -11,7 +11,7 @@ class ValueForValueViewModel(
   scope: CoroutineScope,
   gameState: StateFlow<GameState>
 ) {
-  val buttonVisible = vm.gameState.map {
+  val buttonVisible = gameState.map {
     it == GameState.NotStarted
   }.stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
