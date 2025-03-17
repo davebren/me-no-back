@@ -3,8 +3,6 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 
 
 ### Next Tasks
-- Wasm build + testing
-- Wasm deployment
 - Icon and color tuning
 - Third n-back stimulus
 - Windows build + testing
@@ -24,6 +22,9 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
   - Number of blocks stacked + match accuracy
 - Extra time before lock
 - Button to reset stats, achievements, and level progress
+- Reset settings confirmation dialog
+- Link to download desktop version
+- Mobile friendly
 
 
 ### Bugs

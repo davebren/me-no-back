@@ -63,13 +63,13 @@ fun GameStartButton(
   val gameState by vm.gameState.collectAsState()
 
   AnimateView(
-    visible = gameState == GameState.Paused || gameState == GameState.NotStarted || gameState == GameState.GameOver,
+    visible = visible,
   ) {
     Column(horizontalAlignment = Alignment.End) {
       Spacer(modifier = Modifier.fillMaxSize().weight(1f))
 
       AnimateView(
-        visible = gameState == GameState.Paused || gameState == GameState.NotStarted || gameState == GameState.GameOver,
+        visible = visible,
         enter = slideInVertically(animationSpec = tween(300, 0)) { height -> height },
         exit = slideOutVertically(animationSpec = tween(300, 0)) { height -> height }
       ) {

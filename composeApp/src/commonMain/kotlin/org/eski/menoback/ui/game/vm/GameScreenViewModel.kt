@@ -3,6 +3,7 @@ package org.eski.menoback.ui.game.vm
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,6 +55,7 @@ class GameScreenViewModel(
   private val achievementsData: AchievementsData = defaultAchievementsData,
 ) : ViewModel() {
   val options = GameOptionsViewModel(viewModelScope, this)
+  val valueForValue = ValueForValueViewModel(viewModelScope, this)
 
   val appColors = MutableStateFlow(AppColors())
   val tetriminoColors = MutableStateFlow(TetriminoColors())
@@ -67,6 +69,10 @@ class GameScreenViewModel(
     gameState == GameState.Running && showSetting
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
+  val startButtonVisible = combine(valueForValue.menuShowing, gameState) { valueMenuShowing, gameState ->
+    !valueMenuShowing
+        && (gameState == GameState.Paused || gameState == GameState.NotStarted || gameState == GameState.GameOver)
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)
   val startButtonClickable = gameState.map {
     it == GameState.GameOver || it == GameState.NotStarted || it == GameState.Paused
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), true)

@@ -2,12 +2,6 @@ package org.eski.menoback.ui.game.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,10 +10,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.collectLatest
 import org.eski.menoback.data.keyBindingSettings
 import org.eski.menoback.data.gameStatsData
-import org.eski.menoback.data.introSettings
 import org.eski.menoback.ui.game.GameIntroDialog
 import org.eski.menoback.ui.game.achievements.AchievementsScreen
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
@@ -46,6 +38,10 @@ fun GameScreen(
     val introShowing by vm.options.introShowing.collectAsState()
     val settingsShowing by vm.options.settingsShowing.collectAsState()
     val achievementsShowing by vm.options.achievementsShowing.collectAsState()
+    val valueForValueShowing by vm.valueForValue.menuShowing.collectAsState()
+
+    val startButtonVisible by vm.startButtonVisible.collectAsState()
+    val valueForValueButtonVisible by vm.valueForValue.buttonVisible.collectAsState()
 
     KeyboardInput(vm, keyBindings)
 
@@ -77,12 +73,19 @@ fun GameScreen(
             }
         }
 
+        ValueForValueButton(
+            vm.valueForValue,
+            visible = valueForValueButtonVisible,
+            containerSize = size,
+            onExpanded = { vm.valueForValue.clicked() }
+        )
+
         GameQuitButton(
             visible = gameState == GameState.Paused || gameState == GameState.GameOver,
             containerSize = size,
             onExpanded = { vm.quitGame() }
         )
-        GameStartButton(vm, true, containerSize = size)
+        GameStartButton(vm, startButtonVisible, containerSize = size)
     }
 
     if (settingsShowing) {
@@ -106,4 +109,6 @@ fun GameScreen(
             onDismiss = { vm.options.achievementsDismissed() }
         )
     }
+
+    ValueForValueScreen(vm.valueForValue, valueForValueShowing)
 }
