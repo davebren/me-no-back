@@ -64,8 +64,11 @@ private val dividerColor = Color(0x33FFFFFF)
   Box(
     modifier = Modifier.fillMaxWidth().padding(grid2)
   ) {
+    var modifier = Modifier.fillMaxWidth()
+    if (visible) modifier = modifier.verticalScroll(scrollState)
+
     Column(
-      modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)
+      modifier = modifier
     ) {
       Spacer(modifier = Modifier.height(grid2 * 2))
 

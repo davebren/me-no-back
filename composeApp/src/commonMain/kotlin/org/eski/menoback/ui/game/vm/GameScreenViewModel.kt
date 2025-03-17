@@ -55,7 +55,6 @@ class GameScreenViewModel(
   private val achievementsData: AchievementsData = defaultAchievementsData,
 ) : ViewModel() {
   val options = GameOptionsViewModel(viewModelScope, this)
-  val valueForValue = ValueForValueViewModel(viewModelScope, this)
 
   val appColors = MutableStateFlow(AppColors())
   val tetriminoColors = MutableStateFlow(TetriminoColors())
@@ -63,6 +62,8 @@ class GameScreenViewModel(
 
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
+
+  val valueForValue = ValueForValueViewModel(viewModelScope, gameState)
 
   val showGameControls: StateFlow<Boolean> = combine(gameSettings.showGameControls, _gameState) {
     showSetting, gameState ->
