@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,7 @@ private fun KeyBindingSettingsDialogContent(
   onDismiss: () -> Unit
 ) {
   val scrollState = rememberScrollState()
+  var showResetConfirmation by remember { mutableStateOf(false) }
 
   val moveLeft by keyBindingSettings.moveLeft.collectAsState()
   val moveRight by keyBindingSettings.moveRight.collectAsState()
@@ -103,14 +105,6 @@ private fun KeyBindingSettingsDialogContent(
           fontWeight = FontWeight.Bold,
           modifier = Modifier.weight(1f)
         )
-
-        IconButton(onClick = { keyBindingSettings.resetToDefaults() }) {
-          Icon(
-            imageVector = Icons.Default.Refresh,
-            contentDescription = "Reset to Defaults",
-            tint = Color.White
-          )
-        }
 
         IconButton(onClick = onDismiss) {
           Icon(
@@ -195,6 +189,26 @@ private fun KeyBindingSettingsDialogContent(
 
         // Keyboard Controls Section
         SectionHeader(text = "Keyboard Controls")
+
+        // Reset to Default button
+        Button(
+          onClick = { showResetConfirmation = true },
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color(0xFF555555),
+            contentColor = Color.White
+          ),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+        ) {
+          Icon(
+            imageVector = Icons.Default.Refresh,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text("Reset to Default")
+        }
 
         Text(
           text = "Click on a control to rebind it",
@@ -352,6 +366,97 @@ private fun KeyBindingSettingsDialogContent(
 
       LaunchedEffect(selectedBinding) {
         focusRequester.requestFocus()
+      }
+    }
+  }
+
+  // Reset confirmation dialog
+  if (showResetConfirmation) {
+    ResetConfirmationDialog(
+      onConfirm = {
+        keyBindingSettings.resetToDefaults()
+        showResetConfirmation = false
+      },
+      onDismiss = { showResetConfirmation = false }
+    )
+  }
+}
+
+@Composable
+fun ResetConfirmationDialog(
+  onConfirm: () -> Unit,
+  onDismiss: () -> Unit
+) {
+  Dialog(
+    onDismissRequest = onDismiss,
+    properties = DialogProperties(
+      dismissOnBackPress = true,
+      dismissOnClickOutside = true
+    )
+  ) {
+    Card(
+      shape = RoundedCornerShape(16.dp),
+      backgroundColor = Color(0xFF333333),
+      elevation = 8.dp,
+      modifier = Modifier
+        .width(320.dp)
+        .padding(8.dp)
+    ) {
+      Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Icon(
+          imageVector = Icons.Default.Warning,
+          contentDescription = null,
+          tint = Color(0xFFFFA000),
+          modifier = Modifier
+            .size(40.dp)
+            .padding(bottom = 12.dp)
+        )
+
+        Text(
+          text = "Reset Key Bindings",
+          color = Color.White,
+          fontSize = 18.sp,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+          text = "Are you sure you want to reset all key bindings to their default values?",
+          color = Color.White.copy(alpha = 0.9f),
+          fontSize = 15.sp,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          Button(
+            onClick = onDismiss,
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color(0xFF555555),
+              contentColor = Color.White
+            ),
+            modifier = Modifier.weight(1f)
+          ) {
+            Text("Cancel")
+          }
+
+          Button(
+            onClick = onConfirm,
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color(0xFF7E57C2),
+              contentColor = Color.White
+            ),
+            modifier = Modifier.weight(1f)
+          ) {
+            Text("Reset")
+          }
+        }
       }
     }
   }
