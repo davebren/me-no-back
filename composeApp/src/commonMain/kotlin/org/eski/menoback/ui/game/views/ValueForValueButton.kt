@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -79,7 +80,7 @@ fun ValueForValueButton(
         horizontalPadding = grid2,
         verticalPadding = verticalPadding,
         cornerRadius = PressExpandButtonState.Map(unpressed = 40.dp, pressed = 44.dp, expanded = 0.dp),
-        backgroundColor = PressExpandButtonState.staticMap(Color(223, 96, 80)),
+        backgroundColor = PressExpandButtonState.staticMap(Color(153, 0, 255)),
         expandedStateFlow = vm.menuShowing
       ) { transition ->
         expandedFinished.value = transition.currentState == expanded && transition.targetState == expanded
@@ -98,7 +99,7 @@ fun ValueForValueButton(
             modifier = Modifier.size(grid6),
           ) {
             Icon(
-              imageVector = Icons.Filled.Handshake,
+              imageVector = Icons.Filled.Favorite,
               contentDescription = null,
               tint = Color.White,
               modifier = Modifier.size(iconSize)
