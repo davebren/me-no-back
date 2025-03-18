@@ -33,6 +33,8 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
   - Countdown - Keep "Go!" on screen a bit longer
   - Achievements - lock icon
 - Backpropagate new achievements if the user already completed them
-
+- Button tooltips
 
 ### Bugs
+- When re-assigning buttons, if someone assigns a duplicate button, you should clear the earlier assignment
+
