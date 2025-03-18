@@ -21,7 +21,6 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
   - High score achievements
   - Number of blocks stacked + match accuracy
 - Detailed statistics
-- Extra time before lock
 - Button to reset stats, achievements, and level progress
 - Reset settings confirmation dialog
 - Link to download desktop version

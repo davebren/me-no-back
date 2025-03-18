@@ -197,12 +197,14 @@ class GameScreenViewModel(
     }
   }
 
-  private fun tick() {
+  private suspend fun tick() {
     if (_gameState.value != GameState.Running) return
+    val tetrimino = currentTetrimino.value
 
     if (!moveTetriminoDown()) {
-      lockTetrimino()
-      if (!spawnNewPiece()) gameOver(false)
+      delay(min(500L, (gameSpeed.value * 1.5).toLong())) // Add a little extra time to finesse before locking.
+      val locked = lockTetrimino(tetrimino)
+      if (locked && !spawnNewPiece()) gameOver(false)
     }
   }
 
@@ -262,10 +264,11 @@ class GameScreenViewModel(
 
   fun dropPiece() {
     if (_gameState.value != GameState.Running) return
+    val tetrimino = currentTetrimino.value
 
     while (moveTetriminoDown());
-    lockTetrimino()
-    if (!spawnNewPiece()) gameOver(false)
+    val locked = lockTetrimino(tetrimino)
+    if (locked && !spawnNewPiece()) gameOver(false)
   }
 
   fun downClicked(): Boolean {
@@ -286,9 +289,13 @@ class GameScreenViewModel(
   fun nbackMatchChoice(type: NbackStimulus.Type) = nback.matchChoice(tetriminoHistory.entries, type)
   fun nbackNoMatchChoice(type: NbackStimulus.Type) = nback.noMatchChoice(tetriminoHistory.entries, type)
 
-  private fun lockTetrimino() {
-    val current = currentTetrimino.value ?: return
-    val position = currentPiecePosition.value ?: return
+  private var lastLocked: TetriminoHistory.Entry? = null
+  private fun lockTetrimino(tetrimino: TetriminoHistory.Entry?): Boolean {
+    val current = currentTetrimino.value ?: return false
+    val position = currentPiecePosition.value ?: return false
+    if (tetrimino === lastLocked) return false
+    if (moveTetriminoDown()) return false
+    lastLocked = tetrimino // TODO: Need Atomics for race conditions?
 
     gameSettings.nbackSetting.value.forEach {
       if (nback.currentTetriminoMatchChoicesEntered[it.type] == false) nbackNoMatchChoice(it.type)
@@ -313,6 +320,7 @@ class GameScreenViewModel(
     else comboStreak.value = 0
 
     addScore(completedLines, comboStreak.value)
+    return true
   }
 
   private fun clearFilledRows(): Int {
