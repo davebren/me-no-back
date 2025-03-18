@@ -19,6 +19,7 @@ kotlinx-coroutines = "1.10.1"
 kotlin-serialization = "1.7.3"
 dateTime = "0.6.1"
 multiplatformSettings = "1.2.0"
+atomicfu = "0.27.0"
 
 
 [libraries]
@@ -49,3 +50,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }

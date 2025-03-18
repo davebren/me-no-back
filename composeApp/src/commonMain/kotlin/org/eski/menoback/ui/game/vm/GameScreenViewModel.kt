@@ -1,9 +1,12 @@
 package org.eski.menoback.ui.game.vm
 
+import androidx.compose.runtime.InternalComposeApi
+import androidx.compose.runtime.identityHashCode
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -121,6 +124,8 @@ class GameScreenViewModel(
 
   private var timerJob: Job? = null
 
+  val locking = atomic(false)
+
   init {
     gameSettings.gameDuration.launchCollect(viewModelScope) { duration ->
       if (_gameState.value == GameState.NotStarted) {
@@ -197,14 +202,20 @@ class GameScreenViewModel(
     }
   }
 
-  private suspend fun tick() {
+  private suspend fun tick(secondPassId: Int? = null) {
     if (_gameState.value != GameState.Running) return
-    val tetrimino = currentTetrimino.value
+    val tetriminoId = secondPassId ?: currentTetrimino.value?.stableId
 
     if (!moveTetriminoDown()) {
-      delay(min(500L, (gameSpeed.value * 1.5).toLong())) // Add a little extra time to finesse before locking.
-      val locked = lockTetrimino(tetrimino)
-      if (locked && !spawnNewPiece()) gameOver(false)
+      if (secondPassId == null) { // Add a little extra time to finesse before locking.
+        delay(min(500L, (gameSpeed.value * 1.5).toLong()))
+        if (tetriminoId != currentTetrimino.value?.stableId) return
+        tick(tetriminoId) // See if we can now move down again before locking.
+      } else if (locking.compareAndSet(expect = false, update = true)) {
+        lockTetrimino()
+        if (!spawnNewPiece()) gameOver(false)
+        locking.value = false
+      }
     }
   }
 
@@ -248,13 +259,13 @@ class GameScreenViewModel(
 
     val rotatedPiece = current.tetrimino.rotate(direction)
     if (board.value.validPosition(rotatedPiece, position)) {
-      currentTetrimino.value = TetriminoHistory.Entry(rotatedPiece, current.colorType)
+      currentTetrimino.value = current.copy(tetrimino = rotatedPiece)
     } else {
       // Try wall kick (adjust position if rotation would cause collision)
       for (offset in listOf(-1, 1, -2, 2)) {
         val newPosition = position.copy(col = position.col + offset)
         if (board.value.validPosition(rotatedPiece, newPosition)) {
-          currentTetrimino.value = TetriminoHistory.Entry(rotatedPiece, current.colorType)
+          currentTetrimino.value = current.copy(tetrimino = rotatedPiece)
           currentPiecePosition.value = newPosition
           break
         }
@@ -264,11 +275,14 @@ class GameScreenViewModel(
 
   fun dropPiece() {
     if (_gameState.value != GameState.Running) return
-    val tetrimino = currentTetrimino.value
 
     while (moveTetriminoDown());
-    val locked = lockTetrimino(tetrimino)
-    if (locked && !spawnNewPiece()) gameOver(false)
+    if (locking.compareAndSet(expect = false, update = true)) {
+      lockTetrimino()
+      if (!spawnNewPiece()) gameOver(false)
+      locking.value = false
+    }
+
   }
 
   fun downClicked(): Boolean {
@@ -289,13 +303,9 @@ class GameScreenViewModel(
   fun nbackMatchChoice(type: NbackStimulus.Type) = nback.matchChoice(tetriminoHistory.entries, type)
   fun nbackNoMatchChoice(type: NbackStimulus.Type) = nback.noMatchChoice(tetriminoHistory.entries, type)
 
-  private var lastLocked: TetriminoHistory.Entry? = null
-  private fun lockTetrimino(tetrimino: TetriminoHistory.Entry?): Boolean {
+  private fun lockTetrimino(): Boolean {
     val current = currentTetrimino.value ?: return false
     val position = currentPiecePosition.value ?: return false
-    if (tetrimino === lastLocked) return false
-    if (moveTetriminoDown()) return false
-    lastLocked = tetrimino // TODO: Need Atomics for race conditions?
 
     gameSettings.nbackSetting.value.forEach {
       if (nback.currentTetriminoMatchChoicesEntered[it.type] == false) nbackNoMatchChoice(it.type)
@@ -376,12 +386,13 @@ class GameScreenViewModel(
     currentTetrimino.value = nextTetriminos.value.firstOrNull() ?: throw IllegalStateException()
     nextTetriminos.value = nextTetriminos.value.subList(1, nextTetriminos.value.size)
     if (morePiecesNeeded()) fillNextPieces()
-    currentTetrimino.value?.let { tetriminoHistory.add(it.tetrimino, it.colorType) }
+    currentTetrimino.value?.let { tetriminoHistory.add(it.tetrimino, it.colorType, it.stableId) }
     currentPiecePosition.value = newTetriminoStartPosition
 
     return board.value.validPosition(currentTetrimino.value?.tetrimino, newTetriminoStartPosition)
   }
 
+  var pieceId = 0
   private fun fillNextPieces() {
     val unpickedNextPieces = Tetrimino.types.toMutableList()
     val nextPieces = nextTetriminos.value.toMutableList()
@@ -407,7 +418,7 @@ class GameScreenViewModel(
         val nextTetrimino = unpickedNextPieces.random()
         val nextColor = if (nback.colorNbackEnabled.value) NbackTetriminoColor.random()
           else NbackTetriminoColor.fromIndex(nextTetrimino.type)
-        TetriminoHistory.Entry(nextTetrimino, nextColor)
+        TetriminoHistory.Entry(nextTetrimino, nextColor, pieceId++)
       }
 
       unpickedNextPieces.remove(nextPiece.tetrimino)

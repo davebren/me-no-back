@@ -9,9 +9,10 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.atomicfu)
 }
 
-val version = "1.0.1"
+val version = "1.1.0"
 
 kotlin {
     androidTarget {
