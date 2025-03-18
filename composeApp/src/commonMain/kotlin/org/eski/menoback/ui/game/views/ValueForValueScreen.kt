@@ -108,7 +108,7 @@ private val dividerColor = Color(0x33FFFFFF)
         ) {
           Column(modifier = Modifier.padding(16.dp)) {
             Text(
-              "MeNoBack is built on the value for value model. If you receive value from this game, consider giving value back in one of the following ways:",
+              "MeNoBack is built on the value for value model. If you receive value from this game, consider supporting the developer (David) and give value back in one of the following ways:",
               color = textColor,
               fontSize = 16.sp,
               lineHeight = 24.sp
@@ -120,7 +120,7 @@ private val dividerColor = Color(0x33FFFFFF)
       spacer(height = grid2 * 1.5f)
       Treasure(visible, uriHandler)
       spacer(height = grid2)
-      Time(visible)
+      Time(visible, uriHandler)
       spacer(height = grid2)
       Talent(visible, uriHandler)
       spacer(height = grid2 * 1.5f)
@@ -242,21 +242,19 @@ private fun BulletPoint(text: String) {
 @Composable
 private fun FeatureList() {
   val features = listOf(
-    "Icon and color tuning",
+    "Detailed stats tracking",
     "Third n-back stimulus",
-    "Windows build + testing",
-    "Linux build + testing",
+    "Windows desktop version",
+    "Linux desktop version",
     "Configurable theming",
-    "Mac toolbar styling",
     "Recursive gravity",
-    "Add invisible top row",
     "Dig mode",
     "Multiplayer",
     "Blind mode",
-    "Add sound effects + mute button",
-    "Achievements (level progressions, high scores)",
-    "Extra time before lock",
-    "Mobile friendly version"
+    "Sound effects",
+    "Design enhancements",
+    "More achievements",
+    "Small screen friendly design",
   )
 
   features.forEach { feature ->
@@ -302,7 +300,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     delay = 100
   ) {
     Text(
-      "Financial support helps ensure continued development:",
+      "Financial support helps ensure continued development and is vital to David's project to take brain training to the next level:",
       color = textColor,
       fontSize = 16.sp,
       modifier = Modifier.padding(bottom = 8.dp)
@@ -323,7 +321,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
   }
 }
 
-@Composable fun ColumnScope.Time(visible: Boolean) {
+@Composable fun ColumnScope.Time(visible: Boolean, uriHandler: UriHandler) {
   // Time section
   ValueSection(
     title = "Time",
@@ -342,7 +340,14 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     BulletPoint("Tell your friends and family about the game")
     BulletPoint("Share your experience on social media")
     BulletPoint("Create videos or tutorials about MeNoBack")
-    BulletPoint("Write a review on app stores or gaming platforms")
+    BulletPoint("Join the BrainTraining discord and become a beta tester")
+
+    Button(
+      onClick = { uriHandler.openUri("https://discordapp.com/channels/941878177389772801/1351359086360399922") },
+      modifier = Modifier.align(Alignment.CenterHorizontally)
+    ) {
+      Text("Join the Discord!")
+    }
   }
 }
 
@@ -365,7 +370,6 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     BulletPoint("Contribute code or fix bugs")
     BulletPoint("Improve UI/UX design")
     BulletPoint("Create artwork or sound effects")
-    BulletPoint("Help with testing on different platforms")
     BulletPoint("Translate the game to other languages")
 
     spacer(height = 12.dp)
