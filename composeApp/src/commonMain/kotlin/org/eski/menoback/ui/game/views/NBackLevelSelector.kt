@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.data.GameStatsData
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
+import org.eski.ui.util.grid
 
 @Composable
 fun NBackLevelSelector(
@@ -66,14 +68,16 @@ fun NBackLevelSelector(
       Button(
         onClick = { vm.nback.decreaseLevel() },
         modifier = Modifier.size(40.dp),
+        contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
           backgroundColor = Color(0xFF444444)
         )
       ) {
         Icon(
-          Icons.Default.Remove,
+          modifier = Modifier.size(20.dp),
+          imageVector = Icons.Default.Remove,
           contentDescription = "Decrease N-Back Level",
-          tint = Color.White
+          tint = Color.White,
         )
       }
 
@@ -92,19 +96,22 @@ fun NBackLevelSelector(
         onClick = { vm.nback.increaseLevel() },
         enabled = nbackLevel < maxLevel,
         modifier = Modifier.size(40.dp),
+        contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
           backgroundColor = if (nbackLevel < maxLevel) Color(0xFF444444) else Color(0xFF333333)
         )
       ) {
         if (nbackLevel < maxLevel) {
           Icon(
-            Icons.Default.Add,
+            modifier = Modifier.size(20.dp),
+            imageVector = Icons.Default.Add,
             contentDescription = "Increase N-Back Level",
             tint = Color.White
           )
         } else {
           Icon(
-            Icons.Default.Lock,
+            modifier = Modifier.size(20.dp),
+            imageVector = Icons.Default.Lock,
             contentDescription = "Level Locked",
             tint = Color.Gray
           )
