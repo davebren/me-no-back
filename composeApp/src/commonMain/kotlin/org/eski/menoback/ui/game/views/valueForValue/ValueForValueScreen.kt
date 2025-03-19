@@ -342,7 +342,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     BulletPoint("Join the BrainTraining discord and become a beta tester")
 
     Button(
-      onClick = { uriHandler.openUri("https://discordapp.com/channels/941878177389772801/1351359086360399922") },
+      onClick = { uriHandler.openUri("https://discord.gg/YVYakN8zTp") },
       modifier = Modifier.align(Alignment.CenterHorizontally)
     ) {
       Text("Join the Discord!")

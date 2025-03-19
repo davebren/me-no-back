@@ -32,10 +32,12 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
   - Color match toggle
   - Countdown - Keep "Go!" on screen a bit longer
   - Achievements - lock icon
+  - Skip countdown on game resume
 - Backpropagate new achievements if the user already completed them
 - Button tooltips
 - Display version on home screen
 
 ### Bugs
 - When re-assigning buttons, if someone assigns a duplicate button, you should clear the earlier assignment
+- Touch state on resume button
 
