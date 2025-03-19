@@ -12,7 +12,7 @@ plugins {
     alias(libs.plugins.atomicfu)
 }
 
-val version = "1.1.1"
+val version = "1.2.0"
 
 kotlin {
     androidTarget {
