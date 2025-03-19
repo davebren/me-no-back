@@ -47,14 +47,13 @@ data class Board(
       } else IntArray(boardWidth)
     }
 
-    for (rowIndex in boardHeight - (newDigRows + 1) until boardHeight) {
+    for (rowIndex in boardHeight - newDigRows until boardHeight) {
       val missingSquare = ((lastDigMissingSquare ?: 0) + Random.nextInt(boardWidth - 1)) % boardWidth
       lastDigMissingSquare = missingSquare
       for (columnIndex in 0 until boardWidth) {
         if (columnIndex != missingSquare) newMatrix[rowIndex][columnIndex] = Tetrimino.lockedType
       }
     }
-
     return Board(newMatrix)
   }
 
@@ -83,6 +82,10 @@ data class Board(
     }
 
     return true
+  }
+
+  fun print() {
+    printBoard(matrix)
   }
 
   private fun printBoard(matrix: Array<IntArray>) {
