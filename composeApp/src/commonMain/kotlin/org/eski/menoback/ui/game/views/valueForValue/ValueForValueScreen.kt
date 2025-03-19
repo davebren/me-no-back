@@ -247,7 +247,6 @@ private fun FeatureList() {
     "Linux desktop version",
     "Configurable theming",
     "Recursive gravity",
-    "Dig mode",
     "Multiplayer",
     "Blind mode",
     "Sound effects",

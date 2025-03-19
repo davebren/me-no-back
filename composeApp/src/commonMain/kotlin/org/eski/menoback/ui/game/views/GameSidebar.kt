@@ -65,20 +65,11 @@ fun NBackSettingsPanel(vm: GameScreenViewModel) {
       .background(Color(0xFF3A3A3A), RoundedCornerShape(8.dp))
       .padding(12.dp)
   ) {
-    Text(
-      text = "N-Back Settings",
-      fontSize = 16.sp,
-      fontWeight = FontWeight.Bold,
-      color = Color.White
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
 
     NBackLevelSelector(vm)
-
     Spacer(modifier = Modifier.height(12.dp))
-
     ColorNbackToggle(vm)
+    DigToggle(vm)
   }
 }
 

@@ -1,6 +1,7 @@
 package org.eski.menoback.ui.game.model
 
 import org.eski.util.deepCopy
+import kotlin.random.Random
 
 const val boardWidth = 10
 const val boardHeight = 20
@@ -39,6 +40,24 @@ data class Board(
     return Board(newMatrix)
   }
 
+  fun addDigRows(newDigRows: Int): Board {
+    val newMatrix = Array(boardHeight) {
+      if (it < (boardHeight - newDigRows)) {
+        matrix[it + newDigRows].copyOf()
+      } else IntArray(boardWidth)
+    }
+
+    for (rowIndex in boardHeight - (newDigRows + 1) until boardHeight) {
+      val missingSquare = ((lastDigMissingSquare ?: 0) + Random.nextInt(boardWidth - 1)) % boardWidth
+      lastDigMissingSquare = missingSquare
+      for (columnIndex in 0 until boardWidth) {
+        if (columnIndex != missingSquare) newMatrix[rowIndex][columnIndex] = Tetrimino.lockedType
+      }
+    }
+
+    return Board(newMatrix)
+  }
+
   fun validPosition(tetrimino: Tetrimino?, position: Tetrimino.Position): Boolean {
     if (tetrimino == null) return false
 
@@ -64,5 +83,13 @@ data class Board(
     }
 
     return true
+  }
+
+  private fun printBoard(matrix: Array<IntArray>) {
+    matrix.forEach { println(it.joinToString(" ")) }
+  }
+
+  companion object {
+    var lastDigMissingSquare: Int? = null
   }
 }

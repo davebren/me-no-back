@@ -30,6 +30,7 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
     private const val feedbackModeKey = "$settingsKey.feedbackModes"
     private const val nbackSettingKey = "$settingsKey.nback"
     private const val showGameControlsKey = "$settingsKey.showGameControls"
+    private const val digModeKey = "$settingsKey.digMode"
   }
 
   val gameDuration = MutableStateFlow(settings.getInt(gameDurationKey, GameDuration.default.durationSeconds))
@@ -39,6 +40,8 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
 
   val feedbackMode = MutableStateFlow<List<FeedbackMode>>(listOf(FeedbackMode.icon))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.shape, 2)))
+  val digModeEnabled = MutableStateFlow<Boolean>(settings.getBoolean(digModeKey, false))
+
   val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
 
   val currentMaxLevel: StateFlow<Int> = combine(gameDuration, nbackSetting, statsData.lastUnlockedLevelUpdate) {
@@ -114,6 +117,11 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
       nbackSetting.value = oldSetting.toMutableList().apply { add(NbackStimulus(stimulusType, level)) }
     }
     saveNbackSetting()
+  }
+
+  fun toggleDigMode() {
+    digModeEnabled.value = !digModeEnabled.value
+    settings.putBoolean(digModeKey, digModeEnabled.value)
   }
 
   fun increaseNbackLevel() {

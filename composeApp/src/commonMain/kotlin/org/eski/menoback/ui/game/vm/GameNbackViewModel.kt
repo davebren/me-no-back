@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,7 +46,14 @@ class GameNbackViewModel(
 
   val feedback = MutableStateFlow<FeedbackState>(FeedbackState.none)
 
-  val multiplier = MutableStateFlow<Float>(1f)
+  val baseMultiplier = gameSettings.digModeEnabled.map { digModeEnabled ->
+    if (digModeEnabled) 2f else 1f
+  }
+
+  val nbackMultiplier = MutableStateFlow<Float>(1f)
+  val multiplier = combine(baseMultiplier, nbackMultiplier) { base, nback ->
+    base * nback
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), 1f)
 
   val multiplierText = multiplier.map {
     if (!it.toString().contains('.')) "${it}x"
@@ -57,6 +65,7 @@ class GameNbackViewModel(
   val maxLevelText: StateFlow<String> = gameSettings.gameDurationFormatted.map { duration ->
     "Play at this level for ${duration} with ${GameStatsData.accuracyThreshold}%+ accuracy to unlock the next level."
  }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
+
 
   init {
     scope.launch {
@@ -80,7 +89,7 @@ class GameNbackViewModel(
   fun reset() {
     matchStats.value = MatchStats()
     streak.value = 0
-    multiplier.value = 1f
+    nbackMultiplier.value = 1f
   }
 
   /**
@@ -189,8 +198,9 @@ class GameNbackViewModel(
   fun colorNbackToggled() = gameSettings.toggleNbackStimulus(NbackStimulus.Type.color)
 
   private fun updateMultiplier(correct: Boolean) {
-    return if (!correct) multiplier.value = max(1f, multiplier.value / 2f)
-    else multiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
+    val baseMultiplier = if (gameSettings.digModeEnabled.value) 2f else 1f
+    return if (!correct) nbackMultiplier.value = max(baseMultiplier, nbackMultiplier.value / 2f)
+    else nbackMultiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
   }
 
   fun onGameStarted() {

@@ -66,6 +66,8 @@ class GameScreenViewModel(
   private val _gameState = MutableStateFlow<GameState>(GameState.NotStarted)
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
+  val digModeEnabled = gameSettings.digModeEnabled
+
   val valueForValue = ValueForValueViewModel(viewModelScope, gameState)
 
   val showGameControls: StateFlow<Boolean> = combine(gameSettings.showGameControls, _gameState) {
@@ -141,6 +143,8 @@ class GameScreenViewModel(
     }
   }
 
+  fun digModeToggled() = gameSettings.toggleDigMode()
+
   fun startGameKey() {
     when (gameState.value) {
       GameState.Running -> {}
@@ -153,8 +157,9 @@ class GameScreenViewModel(
     if (_gameState.value != GameState.Running) {
       quitGame()
       _gameState.value = GameState.Running
+      if (digModeEnabled.value) board.value = board.value.addDigRows(5)
       fillNextPieces()
-      spawnNewPiece()
+      spawnNewPiece(true)
       startGameLoop()
       startTimer()
       nback.onGameStarted()
@@ -185,6 +190,7 @@ class GameScreenViewModel(
     nextTetriminos.value = emptyList()
     tetriminoHistory.clear()
     nback.reset()
+    digSpawnCounter = 0
     comboStreak.value = 0
     score.value = 0
     gameSpeed.value = initialGameTickRate
@@ -382,7 +388,15 @@ class GameScreenViewModel(
     score.value += (baseScore * comboMultiplier * nback.multiplier.value).toLong()
   }
 
-  private fun spawnNewPiece(): Boolean {
+  private var digSpawnCounter = 0
+  private fun spawnNewPiece(initialSpawn: Boolean = false): Boolean {
+    if (!initialSpawn && digModeEnabled.value) {
+      digSpawnCounter++
+      if (digSpawnCounter == 10) {
+        digSpawnCounter = 0
+        board.value = board.value.addDigRows(1)
+      }
+    }
     currentTetrimino.value = nextTetriminos.value.firstOrNull() ?: throw IllegalStateException()
     nextTetriminos.value = nextTetriminos.value.subList(1, nextTetriminos.value.size)
     if (morePiecesNeeded()) fillNextPieces()
