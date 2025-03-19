@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import org.eski.menoback.ui.game.model.Board
 import org.eski.menoback.ui.TetriminoColors
 import org.eski.menoback.ui.game.model.Tetrimino
+import org.eski.menoback.ui.game.views.feedback.FeedbackIconAnimation
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
 @Composable
@@ -65,6 +66,8 @@ fun GameBoard(
         }
       }
     }
+
+    FeedbackIconAnimation(vm)
 
     GameOverOverlay(vm = vm)
     PauseOverlay(vm)

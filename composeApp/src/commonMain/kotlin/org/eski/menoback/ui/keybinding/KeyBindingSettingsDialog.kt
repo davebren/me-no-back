@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.model.FeedbackMode
+import org.eski.ui.views.CenteredVerticalText
 import org.eski.util.getKeyName
 
 @Composable
@@ -74,8 +75,8 @@ private fun KeyBindingSettingsDialogContent(
   val startGame by keyBindingSettings.startGame.collectAsState()
   val pauseGame by keyBindingSettings.pauseGame.collectAsState()
 
-  // Get current feedback mode and game controls visibility
-  val feedbackMode by gameSettings.feedbackMode.collectAsState()
+  // Get current feedback modes and game controls visibility
+  val feedbackModes by gameSettings.feedbackMode.collectAsState()
   val showGameControls by gameSettings.showGameControls.collectAsState()
 
   var selectedBinding by remember { mutableStateOf<String?>(null) }
@@ -131,7 +132,7 @@ private fun KeyBindingSettingsDialogContent(
         SectionHeader(text = "Game Display")
 
         Text(
-          text = "Visual Feedback Mode",
+          text = "Feedback Mode",
           color = Color.White,
           fontSize = 15.sp,
           modifier = Modifier
@@ -139,22 +140,21 @@ private fun KeyBindingSettingsDialogContent(
             .padding(bottom = 8.dp)
         )
 
-        Row(
+        Column(
           modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(bottom = 16.dp)
         ) {
-          FeedbackOptionButton(
-            text = "None",
-            isSelected = feedbackMode == FeedbackMode.none,
-            onClick = { gameSettings.setFeedbackMode(FeedbackMode.none) }
+          FeedbackModeCheckbox(
+            text = "Flash Background",
+            isChecked = feedbackModes.contains(FeedbackMode.flashBackground),
+            onCheckedChange = { gameSettings.toggleFeedbackMode(FeedbackMode.flashBackground) }
           )
 
-          FeedbackOptionButton(
-            text = "Flash Background",
-            isSelected = feedbackMode == FeedbackMode.flashBackground,
-            onClick = { gameSettings.setFeedbackMode(FeedbackMode.flashBackground) }
+          FeedbackModeCheckbox(
+            text = "Show Icon",
+            isChecked = feedbackModes.contains(FeedbackMode.icon),
+            onCheckedChange = { gameSettings.toggleFeedbackMode(FeedbackMode.icon) }
           )
         }
 
@@ -383,6 +383,36 @@ private fun KeyBindingSettingsDialogContent(
 }
 
 @Composable
+fun FeedbackModeCheckbox(
+  text: String,
+  isChecked: Boolean,
+  onCheckedChange: (Boolean) -> Unit
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = 4.dp)
+      .clickable { onCheckedChange(!isChecked) },
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Checkbox(
+      checked = isChecked,
+      onCheckedChange = onCheckedChange,
+      colors = CheckboxDefaults.colors(
+        checkedColor = Color(0xFF4CAF50),
+        uncheckedColor = Color.Gray
+      )
+    )
+    Spacer(modifier = Modifier.width(8.dp))
+    Text(
+      text = text,
+      color = Color.White,
+      fontSize = 15.sp
+    )
+  }
+}
+
+@Composable
 fun ResetConfirmationDialog(
   onConfirm: () -> Unit,
   onDismiss: () -> Unit
@@ -476,7 +506,7 @@ fun RowScope.FeedbackOptionButton(
     ),
     modifier = Modifier.weight(1f)
   ) {
-    Text(text = text)
+    CenteredVerticalText(text = text)
   }
 }
 
@@ -536,7 +566,7 @@ fun KeyBindingRow(
         .clickable(onClick = onClick),
       contentAlignment = Alignment.Center
     ) {
-      Text(
+      CenteredVerticalText(
         text = keyName,
         color = if (isSelected) Color.Yellow else Color.White,
         fontSize = 14.sp

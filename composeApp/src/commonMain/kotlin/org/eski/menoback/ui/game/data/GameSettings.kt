@@ -27,7 +27,7 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
   companion object {
     private const val settingsKey = "settings.game"
     private const val gameDurationKey = "$settingsKey.duration"
-    private const val feedbackModeKey = "$settingsKey.feedbackMode"
+    private const val feedbackModeKey = "$settingsKey.feedbackModes"
     private const val nbackSettingKey = "$settingsKey.nback"
     private const val showGameControlsKey = "$settingsKey.showGameControls"
   }
@@ -37,7 +37,7 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
     formatDuration(it)
   }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
 
-  val feedbackMode = MutableStateFlow(enumFromStableId<FeedbackMode>(settings.getInt(feedbackModeKey, FeedbackMode.default.stableId)))
+  val feedbackMode = MutableStateFlow<List<FeedbackMode>>(listOf(FeedbackMode.icon))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.shape, 2)))
   val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
 
@@ -55,6 +55,12 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
     nbackSettingsJson?.let { jsonString ->
       val decodedSetting = jsonString.safeJsonDecode<List<NbackStimulus>>()
       decodedSetting?.let { nbackSetting.value = it }
+    }
+
+    val feedbackModeJson = settings.getStringOrNull(feedbackModeKey)
+    feedbackModeJson?.let { jsonString ->
+      val decodedSetting = jsonString.safeJsonDecode<List<FeedbackMode>>()
+      decodedSetting?.let { feedbackMode.value = it }
     }
   }
 
@@ -83,9 +89,16 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
     }
   }
 
-  fun setFeedbackMode(feedbackMode: FeedbackMode) {
-    this.feedbackMode.value = feedbackMode
-    settings.putInt(feedbackModeKey, feedbackMode.stableId)
+  fun toggleFeedbackMode(mode: FeedbackMode) {
+    val oldSetting = feedbackMode.value
+    val enabled = oldSetting.find { it == mode } != null
+
+    if (enabled) {
+      feedbackMode.value = oldSetting.filterNot { it == mode }
+    } else {
+      feedbackMode.value = oldSetting.toMutableList().apply { add(mode) }
+    }
+    saveFeedbackSetting()
   }
 
   fun toggleNbackStimulus(stimulusType: NbackStimulus.Type) {
@@ -125,5 +138,9 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
 
   private fun saveNbackSetting() {
     nbackSetting.value.safeJsonEncode()?.let { settings.putString(nbackSettingKey, it) }
+  }
+
+  private fun saveFeedbackSetting() {
+    feedbackMode.value.safeJsonEncode()?.let { settings.putString(feedbackModeKey, it) }
   }
 }

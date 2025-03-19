@@ -1,4 +1,4 @@
-package org.eski.menoback.ui.game.views
+package org.eski.menoback.ui.game.views.feedback
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -17,14 +17,15 @@ import org.eski.menoback.ui.game.model.FeedbackMode
 import org.eski.menoback.ui.game.vm.GameNbackViewModel.FeedbackState
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 
-const val feedbackDurationMillis = 300
+private const val feedbackDurationMillis = 300
 
 @Composable
-fun Modifier.feedback(vm: GameScreenViewModel): Modifier = composed {
+fun Modifier.feedbackFlashAnimation(vm: GameScreenViewModel): Modifier = composed {
   val feedbackState by vm.nback.feedback.collectAsState()
   val feedbackMode by vm.feedbackMode.collectAsState()
 
-  if (feedbackMode == FeedbackMode.none || feedbackState == FeedbackState.none) return@composed this@composed
+  if (!feedbackMode.contains(FeedbackMode.flashBackground) || feedbackState == FeedbackState.none)
+    return@composed this@composed
 
   var animationTriggered by remember { mutableStateOf(false) }
   val animationAlpha by animateFloatAsState(

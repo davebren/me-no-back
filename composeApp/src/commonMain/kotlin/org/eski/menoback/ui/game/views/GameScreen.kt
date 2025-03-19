@@ -19,6 +19,9 @@ import org.eski.menoback.ui.keybinding.KeyBindingSettings
 import org.eski.menoback.ui.keybinding.KeyBindingSettingsDialog
 import org.eski.menoback.ui.game.data.GameSettings
 import org.eski.menoback.ui.game.data.GameStatsData
+import org.eski.menoback.ui.game.views.feedback.feedbackFlashAnimation
+import org.eski.menoback.ui.game.views.valueForValue.ValueForValueButton
+import org.eski.menoback.ui.game.views.valueForValue.ValueForValueScreen
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.keybinding.KeyboardInput
 import org.eski.ui.util.grid2
@@ -50,7 +53,7 @@ fun GameScreen(
             .fillMaxSize()
             .background(color = Color.DarkGray)
             .onSizeChanged { size = it }
-            .feedback(vm)
+            .feedbackFlashAnimation(vm)
     ) {
 
         Column(
