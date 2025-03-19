@@ -338,7 +338,7 @@ private fun ColumnScope.Treasure(visible: Boolean, uriHandler: UriHandler) {
     BulletPoint("Tell your friends and family about the game")
     BulletPoint("Share your experience on social media")
     BulletPoint("Create videos or tutorials about MeNoBack")
-    BulletPoint("Join the BrainTraining discord and become a beta tester")
+    BulletPoint("Join the Brain Training & Intelligence Discord and become a beta tester")
 
     Button(
       onClick = { uriHandler.openUri("https://discord.gg/YVYakN8zTp") },
