@@ -49,7 +49,7 @@ fun GameBoard(
             .weight(1f)
         ) {
           // Draw each cell in the row
-          row.forEach { cell ->
+          row.forEachIndexed { index, cell ->
             val background = when(cell) {
               Tetrimino.lockedType -> tetriminoColors.locked
               0 -> Color.Gray
@@ -57,8 +57,8 @@ fun GameBoard(
             }
             Box(
               modifier = Modifier
+                .fillMaxSize()
                 .weight(1f)
-                .aspectRatio(1f)
                 .padding(1.dp)
                 .background(background)
             )
