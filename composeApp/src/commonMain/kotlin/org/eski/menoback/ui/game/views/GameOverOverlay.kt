@@ -83,21 +83,11 @@ fun GameOverOverlay(
 
 @Composable
 private fun NewHighScoreContent(score: Long, matchStats: MatchStats, nbackLevel: Int, showLevelUp: Boolean) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     Card(
         backgroundColor = Color(0xFF333333),
         shape = RoundedCornerShape(16.dp),
         elevation = 8.dp,
-        modifier = Modifier.scale(scale).padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
