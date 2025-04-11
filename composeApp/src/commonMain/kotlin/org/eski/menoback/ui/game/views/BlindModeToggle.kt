@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
+import org.eski.ui.icons.EyeOffOutline
 import org.eski.ui.icons.Shovel
 
 @Composable
@@ -35,7 +36,7 @@ fun BlindModeToggle(
     modifier = modifier.fillMaxWidth()
   ) {
     Icon(
-      imageVector = Icons.Shovel,
+      imageVector = Icons.EyeOffOutline,
       contentDescription = "Blind Mode",
       tint = if (enabled) Color.Red else Color.Gray
     )
