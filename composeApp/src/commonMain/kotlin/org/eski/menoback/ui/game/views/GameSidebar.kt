@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,19 +34,40 @@ import org.eski.menoback.ui.game.vm.GameScreenViewModel
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.ui.util.grid
 import org.eski.ui.util.grid2
+import org.eski.ui.views.CenteredVerticalText
+import org.eski.ui.views.spacer
 
 @Composable
 fun RowScope.GameSidebar(vm: GameScreenViewModel) {
   val showGameControls by vm.showGameControls.collectAsState()
   val gameState by vm.gameState.collectAsState()
+  val nbackLevel by vm.nback.level.collectAsState()
+  val nbackStreak by vm.nback.streak.collectAsState()
+  val nbackMultiplierText by vm.nback.multiplierText.collectAsState()
+  val score by vm.score.collectAsState()
 
   Column(
     modifier = Modifier.widthIn(100.dp, 300.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.SpaceBetween
   ) {
+
+    if (gameState != GameState.NotStarted) {
+      Score(score)
+    }
+
     NextPiecePreview(vm, modifier = Modifier.size(120.dp))
-    Spacer(modifier = Modifier.height(grid2))
+    Spacer(modifier = Modifier.height(grid))
+
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+      HeaderInfoItem(label = "Multiplier", value = nbackMultiplierText)
+      HeaderInfoItem(label = "$nbackLevel-Back", value = "Streak: $nbackStreak")
+    }
+    spacer(height = grid)
+
 
     // Add N-Back Level and Color Mode settings when game is not running
     if (gameState == GameState.NotStarted || gameState == GameState.GameOver) {
@@ -124,5 +147,29 @@ fun NextPiecePreview(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun Score(score: Long) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = Modifier
+      .fillMaxWidth()
+      .border(1.dp, Color.DarkGray, RoundedCornerShape(8.dp))
+      .background(Color(0xFF3A3A3A), RoundedCornerShape(8.dp))
+      .padding(grid)
+  ) {
+    CenteredVerticalText(
+      text = "Score",
+      fontSize = 16.sp,
+      color = Color.LightGray
+    )
+    CenteredVerticalText(
+      text = score.toString(),
+      fontSize = 16.sp,
+      fontWeight = FontWeight.Bold,
+      color = Color.White,
+    )
   }
 }

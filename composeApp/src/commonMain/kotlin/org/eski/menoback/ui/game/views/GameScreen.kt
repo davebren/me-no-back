@@ -24,7 +24,9 @@ import org.eski.menoback.ui.game.views.valueForValue.ValueForValueButton
 import org.eski.menoback.ui.game.views.valueForValue.ValueForValueScreen
 import org.eski.menoback.ui.game.vm.GameState
 import org.eski.menoback.ui.keybinding.KeyboardInput
+import org.eski.ui.util.grid
 import org.eski.ui.util.grid2
+import org.eski.ui.views.spacer
 
 @Composable
 fun GameScreen(
@@ -63,14 +65,25 @@ fun GameScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ActionBarMenu(vm)
-            GameHeader(vm, gameSettings)
+            spacer(height = grid)
+            GameHeader(vm)
             Spacer(modifier = Modifier.height(grid2))
 
             Row(
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.Center
             ) {
-                GameBoard(vm, modifier = Modifier.fillMaxHeight())
+                Column(
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    Timer(
+                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
+                        vm,
+                        gameSettings
+                    )
+                    spacer(height = grid)
+                    GameBoard(vm, modifier = Modifier.fillMaxHeight())
+                }
                 Spacer(modifier = Modifier.width(16.dp))
                 GameSidebar(vm)
             }

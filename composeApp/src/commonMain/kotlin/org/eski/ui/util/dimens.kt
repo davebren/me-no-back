@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 val grid = 8.dp
 val gridHalf = 4.dp
+val gridPlusHalf = 12.dp
 val grid2 = 16.dp
 val grid3 = 24.dp
 val grid4 = 32.dp

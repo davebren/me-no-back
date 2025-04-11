@@ -40,3 +40,5 @@ MeNoBack: A block stacking game that incorporates n-back memory training.
 ### Bugs
 - When re-assigning buttons, if someone assigns a duplicate button, you should clear the earlier assignment
 - Touch state on resume button
+- Hide level selection in post game
+- Game controls dropdown chevron
