@@ -65,9 +65,15 @@ class GameNbackViewModel(
 
   val showLevelUnlocked = MutableStateFlow<Boolean>(false)
 
-  val maxLevelText: StateFlow<String> = gameSettings.gameDurationFormatted.map { duration ->
-    "Play at this level for ${duration} with ${GameStatsData.accuracyThreshold}%+ accuracy to unlock the next level."
- }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
+  val decisionsRequired: StateFlow<Int> = gameSettings.gameDuration.map { duration ->
+    duration / 3
+  }.stateIn(scope, SharingStarted.Eagerly, 20)
+
+  val maxLevelText: StateFlow<String> = combine(gameSettings.gameDurationFormatted, decisionsRequired) {
+    duration, decisionsRequired ->
+    "Finish the game with ${GameStatsData.accuracyThreshold}%+ accuracy and $decisionsRequired match decisions" +
+        " to unlock the next level."
+  }.stateIn(scope, SharingStarted.WhileSubscribed(), "")
 
 
   init {
@@ -100,8 +106,7 @@ class GameNbackViewModel(
    * Returns true if a new level was unlocked
    */
   fun checkLevelProgression(): Boolean {
-    val totalDecisionsRequired = gameSettings.gameDuration.value / 3
-    if (matchStats.value.totalDecisions < totalDecisionsRequired) return false
+    if (matchStats.value.totalDecisions < decisionsRequired.value) return false
 
     val accuracy = matchStats.value.accuracyPercentage
     if (accuracy >= GameStatsData.accuracyThreshold) {

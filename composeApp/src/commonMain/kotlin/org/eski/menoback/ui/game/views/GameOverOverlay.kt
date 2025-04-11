@@ -56,6 +56,7 @@ fun GameOverOverlay(
     val nbackLevel by vm.nback.level.collectAsState()
     val isNewHighScore = score >= currentHighScore && gameState == GameState.GameOver
     val showLevelUp by vm.nback.showLevelUnlocked.collectAsState()
+    val decisionsRequired by vm.nback.decisionsRequired.collectAsState()
 
     // Only display the overlay when the game is over
     AnimatedVisibility(
@@ -73,16 +74,35 @@ fun GameOverOverlay(
             contentAlignment = Alignment.Center
         ) {
             if (isNewHighScore) {
-                NewHighScoreContent(score = score, matchStats = matchStats, nbackLevel = nbackLevel, showLevelUp = showLevelUp)
+                NewHighScoreContent(
+                    score = score,
+                    matchStats = matchStats,
+                    nbackLevel = nbackLevel,
+                    showLevelUp = showLevelUp,
+                    decisionsRequired = decisionsRequired,
+                )
             } else {
-                GameOverContent(score = score, highScore = currentHighScore, matchStats = matchStats, nbackLevel = nbackLevel, showLevelUp = showLevelUp)
+                GameOverContent(
+                    score = score,
+                    highScore = currentHighScore,
+                    matchStats = matchStats,
+                    nbackLevel = nbackLevel,
+                    showLevelUp = showLevelUp,
+                    decisionsRequired = decisionsRequired,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun NewHighScoreContent(score: Long, matchStats: MatchStats, nbackLevel: Int, showLevelUp: Boolean) {
+private fun NewHighScoreContent(
+    score: Long,
+    matchStats: MatchStats,
+    nbackLevel: Int,
+    showLevelUp: Boolean,
+    decisionsRequired: Int,
+) {
     Card(
         backgroundColor = Color(0xFF333333),
         shape = RoundedCornerShape(16.dp),
@@ -114,8 +134,7 @@ private fun NewHighScoreContent(score: Long, matchStats: MatchStats, nbackLevel:
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Match Statistics Section
-            MatchStatisticsSection(matchStats, nbackLevel)
+            MatchStatisticsSection(matchStats, nbackLevel, decisionsRequired)
 
             if (showLevelUp) {
                 LevelUpNotification(nbackLevel)
@@ -125,7 +144,14 @@ private fun NewHighScoreContent(score: Long, matchStats: MatchStats, nbackLevel:
 }
 
 @Composable
-private fun GameOverContent(score: Long, highScore: Long, matchStats: MatchStats, nbackLevel: Int, showLevelUp: Boolean) {
+private fun GameOverContent(
+    score: Long,
+    highScore: Long,
+    matchStats: MatchStats,
+    nbackLevel: Int,
+    showLevelUp: Boolean,
+    decisionsRequired: Int,
+) {
     Card(
         backgroundColor = Color(0xFF333333),
         shape = RoundedCornerShape(16.dp),
@@ -167,7 +193,7 @@ private fun GameOverContent(score: Long, highScore: Long, matchStats: MatchStats
             Spacer(modifier = Modifier.height(24.dp))
 
             // Match Statistics Section
-            MatchStatisticsSection(matchStats, nbackLevel)
+            MatchStatisticsSection(matchStats, nbackLevel, decisionsRequired)
 
             if (showLevelUp) {
                 LevelUpNotification(nbackLevel)
@@ -237,7 +263,11 @@ private fun LevelUpNotification(currentLevel: Int) {
 }
 
 @Composable
-private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
+private fun MatchStatisticsSection(
+    matchStats: MatchStats,
+    nbackLevel: Int,
+    decisionsRequired: Int,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -255,7 +285,6 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
                 modifier = Modifier.weight(1f)
             )
 
-            // Show level progression indicator
             val accuracy = matchStats.accuracyPercentage
             val accentColor = when {
                 accuracy >= GameStatsData.accuracyThreshold -> Color.Green
@@ -277,7 +306,6 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Match statistics
         Text(
             text = "Matches:",
             fontSize = 16.sp,
@@ -291,7 +319,6 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Non-match statistics
         Text(
             text = "Non-Matches:",
             fontSize = 16.sp,
@@ -310,11 +337,11 @@ private fun MatchStatisticsSection(matchStats: MatchStats, nbackLevel: Int) {
         StatRow("Overall Accuracy", matchStats.formatAccuracy(), Color.Cyan)
         StatRow("Total Decisions", matchStats.totalDecisions.toString(), Color.White)
 
-        // Show progression target
         if (matchStats.accuracyPercentage < GameStatsData.accuracyThreshold) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Need ${GameStatsData.accuracyThreshold}% accuracy to unlock level ${nbackLevel + 1}",
+                text = "Need ${GameStatsData.accuracyThreshold}% accuracy and $decisionsRequired match decisions " +
+                    "to unlock level ${nbackLevel + 1}",
                 color = Color.LightGray,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
