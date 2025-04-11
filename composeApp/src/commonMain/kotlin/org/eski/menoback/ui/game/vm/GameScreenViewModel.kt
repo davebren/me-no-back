@@ -67,6 +67,7 @@ class GameScreenViewModel(
   val gameState: StateFlow<GameState> = _gameState.asStateFlow()
 
   val digModeEnabled = gameSettings.digModeEnabled
+  val blindModeEnabled = gameSettings.blindModeEnabled
 
   val valueForValue = ValueForValueViewModel(viewModelScope, gameState)
 
@@ -144,6 +145,7 @@ class GameScreenViewModel(
   }
 
   fun digModeToggled() = gameSettings.toggleDigMode()
+  fun blindModeToggled() = gameSettings.toggleBlindMode()
 
   fun startGameKey() {
     when (gameState.value) {

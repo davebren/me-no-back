@@ -31,6 +31,7 @@ fun GameBoard(
   val tetriminoColors: TetriminoColors by vm.tetriminoColors.collectAsState()
   val displayBoard: Board by vm.displayBoard.collectAsState()
   val currentTetriminoColor = tetriminoColors.fromInt(currentTetrimino?.colorType?.colorIndex ?: 1)
+  val blindModeEnabled by vm.blindModeEnabled.collectAsState()
 
   Box(
     modifier = modifier
@@ -51,7 +52,7 @@ fun GameBoard(
           // Draw each cell in the row
           row.forEachIndexed { index, cell ->
             val background = when(cell) {
-              Tetrimino.lockedType -> tetriminoColors.locked
+              Tetrimino.lockedType -> if (blindModeEnabled) Color.Gray else tetriminoColors.locked
               0 -> Color.Gray
               else -> currentTetriminoColor ?: tetriminoColors.one
             }

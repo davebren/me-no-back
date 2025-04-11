@@ -1,6 +1,7 @@
 package org.eski.menoback.ui.game.data
 
 import com.russhwolf.settings.Settings
+import com.russhwolf.settings.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,7 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
     private const val nbackSettingKey = "$settingsKey.nback"
     private const val showGameControlsKey = "$settingsKey.showGameControls"
     private const val digModeKey = "$settingsKey.digMode"
+    private const val blindModeKey = "$settingsKey.blindMode"
   }
 
   val gameDuration = MutableStateFlow(settings.getInt(gameDurationKey, GameDuration.default.durationSeconds))
@@ -41,6 +43,7 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
   val feedbackMode = MutableStateFlow<List<FeedbackMode>>(listOf(FeedbackMode.icon))
   val nbackSetting = MutableStateFlow<List<NbackStimulus>>(listOf(NbackStimulus(NbackStimulus.Type.shape, 2)))
   val digModeEnabled = MutableStateFlow<Boolean>(settings.getBoolean(digModeKey, false))
+  val blindModeEnabled = MutableStateFlow<Boolean>(settings.getBoolean(blindModeKey, false))
 
   val showGameControls = MutableStateFlow(settings.getBoolean(showGameControlsKey, true))
 
@@ -122,6 +125,19 @@ class GameSettings(val settings: Settings, val statsData: GameStatsData) {
   fun toggleDigMode() {
     digModeEnabled.value = !digModeEnabled.value
     settings.putBoolean(digModeKey, digModeEnabled.value)
+    if (digModeEnabled.value) {
+      blindModeEnabled.value = false
+      settings.putBoolean(blindModeKey, blindModeEnabled.value)
+    }
+  }
+
+  fun toggleBlindMode() {
+    blindModeEnabled.value = !blindModeEnabled.value
+    settings.putBoolean(blindModeKey, blindModeEnabled.value)
+    if (blindModeEnabled.value) {
+      digModeEnabled.value = false
+      settings.putBoolean(digModeKey, digModeEnabled.value)
+    }
   }
 
   fun increaseNbackLevel() {

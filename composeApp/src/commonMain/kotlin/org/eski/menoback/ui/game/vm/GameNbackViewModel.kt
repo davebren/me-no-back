@@ -46,9 +46,12 @@ class GameNbackViewModel(
 
   val feedback = MutableStateFlow<FeedbackState>(FeedbackState.none)
 
-  val baseMultiplier = gameSettings.digModeEnabled.map { digModeEnabled ->
-    if (digModeEnabled) 2f else 1f
-  }
+  val baseMultiplier: StateFlow<Float> = combine(gameSettings.digModeEnabled, gameSettings.blindModeEnabled) {
+    digModeEnabled, blindModeEnabled ->
+
+    (if (digModeEnabled) 2f else 1f) *
+    (if (blindModeEnabled) 10f else 1f)
+  }.stateIn(scope, SharingStarted.Eagerly, 1f)
 
   val nbackMultiplier = MutableStateFlow<Float>(1f)
   val multiplier = combine(baseMultiplier, nbackMultiplier) { base, nback ->
@@ -198,8 +201,7 @@ class GameNbackViewModel(
   fun colorNbackToggled() = gameSettings.toggleNbackStimulus(NbackStimulus.Type.color)
 
   private fun updateMultiplier(correct: Boolean) {
-    val baseMultiplier = if (gameSettings.digModeEnabled.value) 2f else 1f
-    return if (!correct) nbackMultiplier.value = max(baseMultiplier, nbackMultiplier.value / 2f)
+    return if (!correct) nbackMultiplier.value = max(baseMultiplier.value, nbackMultiplier.value / 2f)
     else nbackMultiplier.value += (setting.value.first().level * 0.2f * setting.value.size)
   }
 

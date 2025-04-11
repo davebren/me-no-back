@@ -88,6 +88,7 @@ fun NBackSettingsPanel(vm: GameScreenViewModel) {
     Spacer(modifier = Modifier.height(12.dp))
     ColorNbackToggle(vm)
     DigToggle(vm)
+    BlindModeToggle(vm)
   }
 }
 
